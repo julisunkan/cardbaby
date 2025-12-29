@@ -152,9 +152,13 @@ def generate_card():
         # Prepare watermark function
         watermark_obj = Watermark.query.first()
         if watermark_obj and watermark_obj.enabled:
+            # Pre-cache watermark params to avoid object access in loop
+            w_text = watermark_obj.text
+            w_color = watermark_obj.color
+            w_opacity = watermark_obj.opacity
+            w_pos = watermark_obj.position
             def watermark_func(card):  # type: ignore
-                return apply_watermark(card, watermark_obj.text, watermark_obj.color, 
-                                     watermark_obj.opacity, watermark_obj.position)
+                return apply_watermark(card, w_text, w_color, w_opacity, w_pos)
         else:
             watermark_func = None  # type: ignore
         
