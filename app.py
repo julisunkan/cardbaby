@@ -296,57 +296,144 @@ def init_db():
             db.session.execute(db.text('ALTER TABLE id_cards ADD COLUMN background_filename VARCHAR(255)'))
         db.session.commit()
         
-        # Create 11 colorful templates
-        if CardTemplate.query.count() == 0:
-            templates = [
-                {'name': 'Passport Pro', 'header_color': '#1a3a52', 'photo_bg': '#003d7a'},
-                {'name': 'Ocean Blue', 'header_color': '#0066cc', 'photo_bg': '#0088ff'},
-                {'name': 'Forest Green', 'header_color': '#1b5e20', 'photo_bg': '#2e7d32'},
-                {'name': 'Sunset Red', 'header_color': '#c62828', 'photo_bg': '#d32f2f'},
-                {'name': 'Royal Purple', 'header_color': '#512da8', 'photo_bg': '#673ab7'},
-                {'name': 'Autumn Gold', 'header_color': '#e65100', 'photo_bg': '#ff6f00'},
-                {'name': 'Mint Fresh', 'header_color': '#00695c', 'photo_bg': '#00897b'},
-                {'name': 'Rose Pink', 'header_color': '#880e4f', 'photo_bg': '#c2185b'},
-                {'name': 'Deep Teal', 'header_color': '#004d73', 'photo_bg': '#0288d1'},
-                {'name': 'Charcoal Pro', 'header_color': '#1a1a1a', 'photo_bg': '#424242'},
-                {'name': 'Corporate Navy', 'header_color': '#1a237e', 'photo_bg': '#3949ab'},
-                {'name': 'Cyber Neon', 'header_color': '#00ffcc', 'photo_bg': '#003333'},
-                {'name': 'Pastel Dreams', 'header_color': '#ffb3ba', 'photo_bg': '#ffdfba'},
-                {'name': 'Midnight Gold', 'header_color': '#2c3e50', 'photo_bg': '#f1c40f'},
-                {'name': 'Electric Violet', 'header_color': '#8e44ad', 'photo_bg': '#2980b9'},
-                {'name': 'Sahara Sand', 'header_color': '#e67e22', 'photo_bg': '#f39c12'},
-                {'name': 'Arctic Frost', 'header_color': '#3498db', 'photo_bg': '#ecf0f1'},
-                {'name': 'Emerald City', 'header_color': '#27ae60', 'photo_bg': '#2ecc71'},
-                {'name': 'Vibrant Lava', 'header_color': '#e74c3c', 'photo_bg': '#c0392b'},
-                {'name': 'Slate Modern', 'header_color': '#7f8c8d', 'photo_bg': '#95a5a6'},
-                {'name': 'Deep Galaxy', 'header_color': '#2c3e50', 'photo_bg': '#000000'}
-            ]
-            
-            for tmpl in templates:
-                config = {
-                    'width': 600,
-                    'height': 380,
+        # Delete old templates and create modern ones
+        CardTemplate.query.delete()
+        
+        # Modern, professional ID card templates
+        modern_templates = [
+            {
+                'name': 'Executive Elite',
+                'config': {
+                    'width': 640,
+                    'height': 400,
                     'background_color': '#ffffff',
-                    'header_height': 60,
-                    'header_color': tmpl['header_color'],
-                    'photo_bg_color': tmpl['photo_bg'],
-                    'photo_x': 20,
-                    'photo_y': 70,
-                    'text_x': 180,
-                    'text_y': 70,
-                    'qr_x': 520,
+                    'header_height': 80,
+                    'header_color': '#1a1f3a',
+                    'photo_bg_color': '#f5f5f5',
+                    'accent_color': '#0066cc',
+                    'photo_x': 25,
+                    'photo_y': 85,
+                    'text_x': 200,
+                    'text_y': 85,
+                    'qr_x': 550,
                     'qr_y': 310,
-                    'qr_size': 60
+                    'qr_size': 70,
+                    'corner_radius': 8
                 }
-                template = CardTemplate(name=tmpl['name'], is_active=True)
-                template.set_config(config)
-                db.session.add(template)
-            
-            # Create default watermark
-            watermark = Watermark()
-            db.session.add(watermark)
-            
-            db.session.commit()
+            },
+            {
+                'name': 'Minimalist Clean',
+                'config': {
+                    'width': 640,
+                    'height': 400,
+                    'background_color': '#f8f9fa',
+                    'header_height': 60,
+                    'header_color': '#ffffff',
+                    'photo_bg_color': '#e9ecef',
+                    'accent_color': '#495057',
+                    'photo_x': 25,
+                    'photo_y': 70,
+                    'text_x': 200,
+                    'text_y': 70,
+                    'qr_x': 550,
+                    'qr_y': 315,
+                    'qr_size': 65,
+                    'border_color': '#dee2e6',
+                    'border_width': 2
+                }
+            },
+            {
+                'name': 'Corporate Blue',
+                'config': {
+                    'width': 640,
+                    'height': 400,
+                    'background_color': '#ffffff',
+                    'header_height': 70,
+                    'header_color': '#003d7a',
+                    'photo_bg_color': '#e3f2fd',
+                    'accent_color': '#0066cc',
+                    'photo_x': 25,
+                    'photo_y': 80,
+                    'text_x': 200,
+                    'text_y': 80,
+                    'qr_x': 550,
+                    'qr_y': 310,
+                    'qr_size': 70,
+                    'shadow': True
+                }
+            },
+            {
+                'name': 'Modern Gradient',
+                'config': {
+                    'width': 640,
+                    'height': 400,
+                    'background_color': '#ffffff',
+                    'header_height': 75,
+                    'header_color': '#667eea',
+                    'photo_bg_color': '#f0f4ff',
+                    'accent_color': '#667eea',
+                    'secondary_accent': '#764ba2',
+                    'photo_x': 25,
+                    'photo_y': 85,
+                    'text_x': 200,
+                    'text_y': 85,
+                    'qr_x': 550,
+                    'qr_y': 310,
+                    'qr_size': 70,
+                    'gradient': True
+                }
+            },
+            {
+                'name': 'Professional Dark',
+                'config': {
+                    'width': 640,
+                    'height': 400,
+                    'background_color': '#ffffff',
+                    'header_height': 70,
+                    'header_color': '#2c3e50',
+                    'photo_bg_color': '#ecf0f1',
+                    'accent_color': '#34495e',
+                    'photo_x': 25,
+                    'photo_y': 80,
+                    'text_x': 200,
+                    'text_y': 80,
+                    'qr_x': 550,
+                    'qr_y': 310,
+                    'qr_size': 70
+                }
+            },
+            {
+                'name': 'Tech Modern',
+                'config': {
+                    'width': 640,
+                    'height': 400,
+                    'background_color': '#0f1419',
+                    'header_height': 70,
+                    'header_color': '#1a1f3a',
+                    'photo_bg_color': '#1e2536',
+                    'accent_color': '#00d9ff',
+                    'text_color': '#ffffff',
+                    'photo_x': 25,
+                    'photo_y': 80,
+                    'text_x': 200,
+                    'text_y': 80,
+                    'qr_x': 550,
+                    'qr_y': 310,
+                    'qr_size': 70
+                }
+            }
+        ]
+        
+        for tmpl in modern_templates:
+            template = CardTemplate(name=tmpl['name'], is_active=True)
+            template.set_config(tmpl['config'])
+            db.session.add(template)
+        
+        # Create default watermark
+        watermark = Watermark()
+        db.session.add(watermark)
+        
+        db.session.commit()
 
 @app.errorhandler(404)
 def not_found(error):
