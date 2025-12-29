@@ -94,59 +94,66 @@ class CardGenerator:
         return card
     
     def add_info_section(self, card, data):
-        """Add professional information section (right side)"""
+        """Add professional information section (right side) - properly distributed vertically"""
         draw = ImageDraw.Draw(card)
         
         try:
-            label_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 11)
-            value_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
-            label_small_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 9)
+            label_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 10)
+            value_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 12)
+            label_small_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 8)
         except:
             label_font = value_font = label_small_font = ImageFont.load_default()
         
-        # Right side content area
+        # Calculate available space for info section
+        info_start_y = self.header_height + 15
+        info_end_y = self.height - 90  # Leave space for MRZ
+        available_height = info_end_y - info_start_y
+        
         info_x = 300
-        info_y = self.header_height + 20
-        line_height = 32
+        info_x_right = 650
+        
+        # Distribute items vertically
+        item_spacing = available_height / 4
         
         # Label color (dark blue)
         label_color = (26, 58, 82)
         value_color = (0, 0, 0)
         
-        # SURNAME / GIVEN NAMES
-        draw.text((info_x, info_y), "SURNAME / NOM", fill=label_color, font=label_small_font)
-        draw.text((info_x, info_y + 12), data.get('full_name', '').upper().split()[0] if data.get('full_name') else '', fill=value_color, font=value_font)
+        # Row 1: SURNAME / GIVEN NAMES
+        y1 = info_start_y
+        draw.text((info_x, y1), "SURNAME / NOM", fill=label_color, font=label_small_font)
+        surname = data.get('full_name', '').upper().split()[0] if data.get('full_name') else ''
+        draw.text((info_x, y1 + 10), surname, fill=value_color, font=value_font)
         
-        draw.text((info_x + 300, info_y), "GIVEN NAMES / PRENOM", fill=label_color, font=label_small_font)
+        draw.text((info_x_right, y1), "GIVEN NAMES / PRENOM", fill=label_color, font=label_small_font)
         given_names = ' '.join(data.get('full_name', '').upper().split()[1:]) if len(data.get('full_name', '').split()) > 1 else ''
-        draw.text((info_x + 300, info_y + 12), given_names, fill=value_color, font=value_font)
+        draw.text((info_x_right, y1 + 10), given_names, fill=value_color, font=value_font)
         
-        # NATIONALITY
-        info_y += line_height
-        draw.text((info_x, info_y), "NATIONALITY / NATIONALITE", fill=label_color, font=label_small_font)
-        draw.text((info_x, info_y + 12), data.get('organization', '')[:3].upper() or 'USA', fill=value_color, font=value_font)
+        # Row 2: NATIONALITY / DATE OF BIRTH
+        y2 = y1 + item_spacing
+        draw.text((info_x, y2), "NATIONALITY", fill=label_color, font=label_small_font)
+        draw.text((info_x, y2 + 10), data.get('organization', '')[:3].upper() or 'USA', fill=value_color, font=value_font)
         
-        # DATE OF BIRTH
-        draw.text((info_x + 300, info_y), "DATE OF BIRTH / DATE NAISSANCE", fill=label_color, font=label_small_font)
+        draw.text((info_x_right, y2), "DATE OF BIRTH", fill=label_color, font=label_small_font)
         dob = data.get('date_of_birth', '')
-        draw.text((info_x + 300, info_y + 12), dob, fill=value_color, font=value_font)
+        draw.text((info_x_right, y2 + 10), dob, fill=value_color, font=value_font)
         
-        # PLACE OF BIRTH
-        info_y += line_height
-        draw.text((info_x, info_y), "PLACE OF BIRTH / LIEU NAISSANCE", fill=label_color, font=label_small_font)
-        draw.text((info_x, info_y + 12), data.get('address', '')[:30], fill=value_color, font=value_font)
+        # Row 3: PLACE OF BIRTH / ID NUMBER
+        y3 = y2 + item_spacing
+        draw.text((info_x, y3), "PLACE OF BIRTH", fill=label_color, font=label_small_font)
+        place = data.get('address', '')[:25]
+        draw.text((info_x, y3 + 10), place, fill=value_color, font=value_font)
         
-        # ID NUMBER
-        draw.text((info_x + 300, info_y), "ID NUMBER / NO. DE DOCUMENT", fill=label_color, font=label_small_font)
-        draw.text((info_x + 300, info_y + 12), data.get('id_number', ''), fill=value_color, font=value_font)
+        draw.text((info_x_right, y3), "ID NUMBER", fill=label_color, font=label_small_font)
+        draw.text((info_x_right, y3 + 10), data.get('id_number', ''), fill=value_color, font=value_font)
         
-        # ISSUE & EXPIRY
-        info_y += line_height
-        draw.text((info_x, info_y), "ISSUED / EMIS", fill=label_color, font=label_small_font)
-        draw.text((info_x, info_y + 12), data.get('issue_date', ''), fill=value_color, font=value_font)
+        # Row 4: ISSUED / EXPIRES
+        y4 = y3 + item_spacing
+        draw.text((info_x, y4), "ISSUED", fill=label_color, font=label_small_font)
+        draw.text((info_x, y4 + 10), data.get('issue_date', ''), fill=value_color, font=value_font)
         
-        draw.text((info_x + 300, info_y), "EXPIRES / EXPIRE", fill=label_color, font=label_small_font)
-        draw.text((info_x + 300, info_y + 12), data.get('expiry_date', ''), fill=value_color, font=value_font)
+        draw.text((info_x_right, y4), "EXPIRES", fill=label_color, font=label_small_font)
+        draw.text((info_x_right, y4 + 10), data.get('expiry_date', ''), fill=value_color, font=value_font)
         
         return card
     

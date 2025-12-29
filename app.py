@@ -85,6 +85,14 @@ def index():
     templates = CardTemplate.query.filter_by(is_active=True).all()
     return render_template('index.html', templates=templates)
 
+@app.route('/manifest.json')
+def manifest():
+    return send_from_directory('.', 'manifest.json')
+
+@app.route('/sw.js')
+def service_worker():
+    return send_from_directory('static', 'sw.js')
+
 @app.route('/api/generate-id')
 def generate_id():
     id_number = MRZGenerator.generate_id_number()

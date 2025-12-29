@@ -2,8 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#dc3545">
+    <meta name="description" content="Professional ID card generation with passport-style design">
     <title>Universal ID Card Generator</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" href="/static/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -109,14 +114,31 @@
             <h2>Your ID Card</h2>
             <div id="cardPreview"></div>
             <div class="btn-group">
-                <a id="downloadPng" href="#" class="btn btn-success">Download as PNG</a>
-                <a id="downloadPdf" href="#" class="btn btn-success">Download as PDF</a>
+                <button onclick="downloadFile('png')" class="btn btn-success">Download as PNG</button>
+                <button onclick="downloadFile('pdf')" class="btn btn-success">Download as PDF</button>
                 <button onclick="location.href='/'" class="btn btn-primary">Generate Another</button>
             </div>
         </div>
     </div>
 
     <script>
+        let currentCard = null;
+
+        function downloadFile(format) {
+            if (!currentCard) {
+                alert('No card generated yet');
+                return;
+            }
+            const fileName = format === 'png' ? currentCard.card_png : currentCard.card_pdf;
+            const url = format === 'png' ? `/static/cards/${fileName}` : `/static/pdfs/${fileName}`;
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         function generateNewID() {
             fetch('/api/generate-id')
                 .then(r => r.json())
@@ -128,6 +150,9 @@
 
         window.addEventListener('load', function() {
             generateNewID();
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+            }
         });
 
         function updatePreview() {
@@ -189,11 +214,10 @@
                 const result = await response.json();
                 
                 if (result.success) {
+                    currentCard = result;
                     document.querySelector('.form-container').style.display = 'none';
                     document.getElementById('result').style.display = 'block';
                     document.getElementById('cardPreview').innerHTML = `<img src="/static/cards/${result.card_png}?t=${Date.now()}" alt="Generated Card">`;
-                    document.getElementById('downloadPng').href = `/static/cards/${result.card_png}`;
-                    document.getElementById('downloadPdf').href = `/static/pdfs/${result.card_pdf}`;
                 } else {
                     alert('Error: ' + (result.error || 'Unknown error'));
                 }
