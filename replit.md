@@ -8,13 +8,20 @@ A full-stack Flask web application for generating professional ID cards with cus
 ### 1. Core ID Card Generation
 - Generate ID cards for workers, students, staff with custom data
 - **Auto-Generated ID Numbers** - Unique IDs in format: ID20251229XXXXX (timestamp-based)
+- **International Passport Style Design** - Professional layout matching real passports
 - Support for multiple themes (default/blue, green, red, corporate)
-- Photo upload (PNG, JPG, GIF)
+- Photo upload (PNG, JPG, GIF) with blue background section
 - Theme selection
 - Output as PNG image and PDF download
 - **Live Card Preview** - Real-time preview updates as you fill the form
-- **Machine-Readable Zone (MRZ)** - Professional barcode-like text at bottom of card
-- **Professional Design** - Gradient header, accent colors, modern layout
+- **Machine-Readable Zone (MRZ)** - Professional barcode-like text at bottom
+- **Professional Passport Layout**:
+  - Dark blue header with golden accent border
+  - Photo section with blue background (left side)
+  - Information fields organized like passport (right side)
+  - Bilingual labels (English/French style)
+  - Security feature indicators
+  - QR code for verification
 
 ### 2. Card Templates (Database-Driven)
 - Default template with configurable dimensions
@@ -163,19 +170,30 @@ The app runs on `http://0.0.0.0:5000`
 
 ## Card Design Features
 
-### Visual Elements
-- **Header**: Gradient background with golden accent border
-- **Colors**: Accent colors (navy, dark blue) on labels for professional appearance
-- **Typography**: Bold headers, clear text hierarchy
-- **MRZ**: Machine-Readable Zone with check digit for authenticity
-- **Professional Layout**: Organized sections for info, dates, and MRZ
+### International Passport Style Layout
+- **Header Section**: Dark blue professional header (#1a3a52) with golden accent border
+- **Photo Section**: Left side with blue background (#003d7a) and white-bordered photo
+- **Information Fields** (Right side with bilingual labels):
+  - SURNAME / NOM
+  - GIVEN NAMES / PRENOM
+  - NATIONALITY / NATIONALITE
+  - DATE OF BIRTH / DATE NAISSANCE
+  - PLACE OF BIRTH / LIEU NAISSANCE
+  - ID NUMBER / NO. DE DOCUMENT
+  - ISSUED / EMIS
+  - EXPIRES / EXPIRE
+- **Security Features**: Hologram-style accent patterns
+- **MRZ Section**: Dark blue background with white text (bottom)
+- **QR Code**: Positioned for quick verification
 
 ### Technical Implementation
-- Card dimensions configurable (default: 1000×600px)
+- Card dimensions: 1000×650px (portrait-style)
 - Auto-generated IDs with timestamp: ID20251229XXXXX
-- MRZ format: 2 lines, 44 characters each (similar to passports)
+- MRZ format: 2 lines, 44 characters each (passport-compatible)
 - Check digit validation for MRZ lines
-- Theme colors: Blue, Green, Red, Corporate
+- Professional color scheme: Dark blue, gold accents, white text
+- RGB-converted images for compatibility
+- Security indicators and professional typography
 
 ## Initial Setup
 The database and default admin user are automatically initialized on first run.
