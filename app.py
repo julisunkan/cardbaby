@@ -309,6 +309,12 @@ def init_db():
             db.session.execute(db.text('ALTER TABLE id_cards ADD COLUMN font_size INTEGER'))
         if 'background_filename' not in columns:
             db.session.execute(db.text('ALTER TABLE id_cards ADD COLUMN background_filename VARCHAR(255)'))
+        if 'font_color' not in columns:
+            db.session.execute(db.text('ALTER TABLE id_cards ADD COLUMN font_color VARCHAR(7) DEFAULT "#000000"'))
+        if 'font_bold' not in columns:
+            db.session.execute(db.text('ALTER TABLE id_cards ADD COLUMN font_bold BOOLEAN DEFAULT 0'))
+        if 'font_italic' not in columns:
+            db.session.execute(db.text('ALTER TABLE id_cards ADD COLUMN font_italic BOOLEAN DEFAULT 0'))
         db.session.commit()
         
         # Delete old templates and create modern ones
