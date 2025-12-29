@@ -9,6 +9,7 @@ from models import db, IDCard, CardTemplate, Watermark, AuditLog, AdminUser
 from utils.card_generator import CardGenerator
 from utils.qr_utils import QRCodeGenerator
 from utils.pdf_export import PDFExporter
+from utils.mrz_utils import MRZGenerator
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'
@@ -75,6 +76,11 @@ def before_request():
 def index():
     templates = CardTemplate.query.filter_by(is_active=True).all()
     return render_template('index.html', templates=templates)
+
+@app.route('/api/generate-id')
+def generate_id():
+    id_number = MRZGenerator.generate_id_number()
+    return jsonify({'id_number': id_number})
 
 @app.route('/generate', methods=['POST'])
 def generate_card():

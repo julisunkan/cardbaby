@@ -7,11 +7,14 @@ A full-stack Flask web application for generating professional ID cards with cus
 
 ### 1. Core ID Card Generation
 - Generate ID cards for workers, students, staff with custom data
+- **Auto-Generated ID Numbers** - Unique IDs in format: ID20251229XXXXX (timestamp-based)
 - Support for multiple themes (default/blue, green, red, corporate)
 - Photo upload (PNG, JPG, GIF)
 - Theme selection
 - Output as PNG image and PDF download
 - **Live Card Preview** - Real-time preview updates as you fill the form
+- **Machine-Readable Zone (MRZ)** - Professional barcode-like text at bottom of card
+- **Professional Design** - Gradient header, accent colors, modern layout
 
 ### 2. Card Templates (Database-Driven)
 - Default template with configurable dimensions
@@ -79,19 +82,25 @@ A full-stack Flask web application for generating professional ID cards with cus
 ## How to Use
 
 ### Generate an ID Card
-1. **Fill the form** on the homepage - as you type, the **Live Preview** on the right updates in real-time
-2. Enter required details:
+1. **Page loads automatically** with a generated Unique ID Number (click "Generate" to get a different one)
+2. **Fill the form** on the homepage - as you type, the **Live Preview** on the right updates in real-time
+3. Enter required details:
    - Full name
-   - Date of birth
-   - Unique ID number
+   - Date of birth (auto-populated in preview)
    - Organization
    - Address
    - Issue and expiry dates
-3. Optional: Add signature, select theme, upload photo
-4. Select card template from dropdown
-5. Click **Generate Card**
-6. Download as PNG or PDF
-7. Click **Generate Another** to create more cards
+4. Optional: Add signature, select theme, upload photo
+5. Select card template from dropdown
+6. Click **Generate Card** to create your professional ID card
+7. Download as PNG (high-quality) or PDF
+8. Click **Generate Another** to create more cards
+
+**Features:**
+- ✓ ID numbers auto-generate with timestamp for uniqueness
+- ✓ Each card includes Machine-Readable Zone (MRZ) at bottom
+- ✓ Professional gradient header with accent colors
+- ✓ Live preview shows real-time updates
 
 ### Verify a Card
 - Use QR code on the card or navigate to `/verify/<id_number>`
@@ -151,6 +160,22 @@ A full-stack Flask web application for generating professional ID cards with cus
 python app.py
 ```
 The app runs on `http://0.0.0.0:5000`
+
+## Card Design Features
+
+### Visual Elements
+- **Header**: Gradient background with golden accent border
+- **Colors**: Accent colors (navy, dark blue) on labels for professional appearance
+- **Typography**: Bold headers, clear text hierarchy
+- **MRZ**: Machine-Readable Zone with check digit for authenticity
+- **Professional Layout**: Organized sections for info, dates, and MRZ
+
+### Technical Implementation
+- Card dimensions configurable (default: 1000×600px)
+- Auto-generated IDs with timestamp: ID20251229XXXXX
+- MRZ format: 2 lines, 44 characters each (similar to passports)
+- Check digit validation for MRZ lines
+- Theme colors: Blue, Green, Red, Corporate
 
 ## Initial Setup
 The database and default admin user are automatically initialized on first run.
