@@ -165,6 +165,8 @@
             signaturePad.clear();
             document.getElementById('signatureInput').value = '';
         }
+
+        function downloadFile(format) {
             if (!currentCard) {
                 alert('No card generated yet');
                 return;
@@ -197,6 +199,8 @@
 
         function updatePreview() {
             const formFields = document.getElementById('cardForm');
+            if (!formFields) return;
+            
             const fullName = formFields.full_name.value;
             const idNumber = formFields.id_number.value;
             const org = formFields.organization.value;
@@ -204,6 +208,8 @@
             const issue = formFields.issue_date.value;
             const expiry = formFields.expiry_date.value;
             const theme = formFields.theme.value;
+            const fontSize = formFields.font_size.value;
+            const fontFamily = formFields.font_family.value;
 
             if (!fullName || !idNumber || !org || !dob || !issue || !expiry) {
                 document.getElementById('previewContainer').innerHTML = '<div class="preview-placeholder">Fill form to see preview</div>';
@@ -216,11 +222,11 @@
             else if (theme === 'corporate') headerColor = '#1a1a1a';
 
             const previewHTML = `
-                <div class="card-preview" style="background-color: #fff; border: 1px solid #ddd; border-radius: 4px;">
-                    <div class="card-header" style="background-color: ${headerColor}; color: white; padding: 15px; font-weight: bold; border-radius: 4px 4px 0 0;">
+                <div class="card-preview" style="background-color: #fff; border: 1px solid #ddd; border-radius: 4px; font-family: ${fontFamily};">
+                    <div class="card-header" style="background-color: ${headerColor}; color: white; padding: 15px; font-weight: bold; border-radius: 4px 4px 0 0; font-size: ${parseInt(fontSize)+4}px;">
                         ${org}
                     </div>
-                    <div class="card-content" style="padding: 15px; font-size: 13px;">
+                    <div class="card-content" style="padding: 15px; font-size: ${fontSize}px;">
                         <div><strong>Name:</strong> ${fullName}</div>
                         <div><strong>ID:</strong> ${idNumber}</div>
                         <div><strong>DOB:</strong> ${dob}</div>
@@ -243,7 +249,7 @@
         document.getElementById('cardForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            if (!signaturePad.isEmpty()) {
+            if (signaturePad && !signaturePad.isEmpty()) {
                 document.getElementById('signatureInput').value = signaturePad.toDataURL();
             }
             

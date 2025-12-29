@@ -45,7 +45,7 @@
                         <td>{{ card.full_name }}</td>
                         <td>{{ card.organization }}</td>
                         <td>
-                            <span class="badge badge-{{ card.status.lower() }}">{{ card.status }}</span>
+                            <span class="badge badge-{{ card.status.lower() if card.status else 'unknown' }}">{{ card.status or 'UNKNOWN' }}</span>
                         </td>
                         <td>{{ card.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
                         <td>
@@ -288,7 +288,7 @@
                         <tr><td><strong>Name:</strong></td><td>${data.full_name}</td></tr>
                         <tr><td><strong>Organization:</strong></td><td>${data.organization}</td></tr>
                         <tr><td><strong>DOB:</strong></td><td>${data.date_of_birth}</td></tr>
-                        <tr><td><strong>Status:</strong></td><td><span class="badge badge-${data.status.toLowerCase()}">${data.status}</span></td></tr>
+                        <tr><td><strong>Status:</strong></td><td><span class="badge badge-${data.status ? data.status.toLowerCase() : 'unknown'}">${data.status}</span></td></tr>
                     </table>
                     <div style="margin-top: 20px; text-align: center;">
                         <img src="/static/cards/${data.card_png}?t=${Date.now()}" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;">

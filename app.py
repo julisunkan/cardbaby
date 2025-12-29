@@ -277,6 +277,19 @@ def init_db():
     with app.app_context():
         db.create_all()
         
+        # Database migration: Check for missing columns
+        from sqlalchemy import inspect
+        inspector = inspect(db.engine)
+        columns = [c['name'] for c in inspector.get_columns('id_cards')]
+        
+        if 'logo_filename' not in columns:
+            db.session.execute(db.text('ALTER TABLE id_cards ADD COLUMN logo_filename VARCHAR(255)'))
+        if 'font_family' not in columns:
+            db.session.execute(db.text('ALTER TABLE id_cards ADD COLUMN font_family VARCHAR(100)'))
+        if 'font_size' not in columns:
+            db.session.execute(db.text('ALTER TABLE id_cards ADD COLUMN font_size INTEGER'))
+        db.session.commit()
+        
         # Create 11 colorful templates
         if CardTemplate.query.count() == 0:
             templates = [
