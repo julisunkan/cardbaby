@@ -172,7 +172,7 @@ def generate_card():
             logo_filename=logo_filename,
             background_filename=background_filename,
             font_family=data.get('font_family', 'DejaVuSans'),
-            font_size=int(data.get('font_size', 20)),
+            font_size=int(data.get('font_size', 10)),
             card_png=card_filename,
             card_pdf=pdf_filename,
             qr_code=os.path.basename(qr_path),
