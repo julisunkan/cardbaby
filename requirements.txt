@@ -12,3 +12,10 @@ python-dateutil==2.8.2
 qrcode==7.4.2
 reportlab==4.0.7
 Werkzeug==3.0.1
+flask
+flask-sqlalchemy
+pillow
+python-dateutil
+qrcode
+reportlab
+werkzeug
