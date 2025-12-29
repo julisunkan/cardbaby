@@ -92,16 +92,19 @@ class CardGenerator:
         value_color = self.hex_to_rgb(font_color_hex)
         label_color = (26, 58, 82) # Keeping labels professional but could be customized too
         
-        font_dir = "/usr/share/fonts/truetype/dejavu/"
+        font_dir = "/usr/share/fonts/truetype/liberation/" if "Liberation" in font_family else "/usr/share/fonts/truetype/dejavu/"
         
         # Determine font path based on bold/italic
         suffix = ""
-        if font_bold and font_italic: suffix = "-BoldOblique"
-        elif font_bold: suffix = "-Bold"
-        elif font_italic: suffix = "-Oblique"
+        if font_bold and font_italic: suffix = "BoldItalic"
+        elif font_bold: suffix = "Bold"
+        elif font_italic: suffix = "Italic"
         
         # Try to find the specific font variant, fallback to base font
-        font_filename = f"{font_family}{suffix}.ttf"
+        if suffix:
+            font_filename = f"{font_family}-{suffix}.ttf"
+        else:
+            font_filename = f"{font_family}.ttf"
         font_path = os.path.join(font_dir, font_filename)
         
         if not os.path.exists(font_path):
