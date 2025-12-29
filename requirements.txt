@@ -27,3 +27,4 @@ qrcode
 reportlab
 werkzeug
 apscheduler
+onnxruntime
