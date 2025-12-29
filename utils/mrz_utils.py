@@ -15,33 +15,25 @@ class MRZGenerator:
     @staticmethod
     def format_mrz(full_name, id_number, date_of_birth, expiry_date):
         """
-        Generate MRZ lines (2 lines, 44 characters each)
-        Format: Similar to passport MRZ
+        Generate MRZ as a single line
         """
-        # Line 1: Type, Country Code, Names
+        # Line 1 parts
         name_parts = full_name.upper().split()
         surname = name_parts[0] if name_parts else "UNKNOWN"
         given_names = "".join(name_parts[1:]) if len(name_parts) > 1 else ""
-        
-        # Pad/truncate name to fit MRZ format
         name_str = f"{surname}<<{given_names}"
         name_str = name_str[:39].ljust(39, '<')
         line1 = f"IDXXX{name_str}"
         
-        # Line 2: ID Number, DOB, Expiry, Check digits
+        # Line 2 parts
         dob_str = datetime.strptime(date_of_birth, '%Y-%m-%d').strftime('%y%m%d')
         exp_str = datetime.strptime(expiry_date, '%Y-%m-%d').strftime('%y%m%d')
-        
-        # Format ID number to fit
         id_formatted = id_number.replace("-", "").upper()[-9:].ljust(9, '0')
-        
-        # Simple check digit calculation (Luhn-like)
         check_digit = MRZGenerator._calculate_check_digit(f"{id_formatted}{dob_str}")
-        
         line2 = f"{id_formatted}{check_digit}{dob_str}0{exp_str}<<<<<<<<<<<"
         line2 = line2[:44]
         
-        return [line1, line2]
+        return f"{line1} {line2}"
     
     @staticmethod
     def _calculate_check_digit(data):

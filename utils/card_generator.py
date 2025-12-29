@@ -166,13 +166,12 @@ class CardGenerator:
         draw = ImageDraw.Draw(card)
         try: mrz_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 10)
         except: mrz_font = ImageFont.load_default()
-        mrz_lines = MRZGenerator.format_mrz(data.get('full_name', 'UNKNOWN'), data.get('id_number', ''), data.get('date_of_birth', ''), data.get('expiry_date', ''))
-        mrz_y_start = self.height - 50
+        mrz_text = MRZGenerator.format_mrz(data.get('full_name', 'UNKNOWN'), data.get('id_number', ''), data.get('date_of_birth', ''), data.get('expiry_date', ''))
+        
+        mrz_y_start = self.height - 35 # Adjusted for single line
         draw.rectangle((0, mrz_y_start - 3, self.width, self.height), fill=(26, 58, 82))
         mrz_x = 10
-        for i, line in enumerate(mrz_lines):
-            y = mrz_y_start + 10 + (i * 15)
-            draw.text((mrz_x, y), line, fill=(255, 255, 255), font=mrz_font)
+        draw.text((mrz_x, mrz_y_start + 5), mrz_text, fill=(255, 255, 255), font=mrz_font)
         return card
 
     def add_security_features(self, card):
