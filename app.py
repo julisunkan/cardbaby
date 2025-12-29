@@ -218,14 +218,44 @@ def generate_card():
 def verify_card(id_number):
     card = IDCard.query.filter_by(id_number=id_number).first()
     if not card:
-        return render_template('verify.html', status='NOT_FOUND')
+        return render_template('verify.html', status='NOT_FOUND', id_number=id_number)
     
     # Check expiry
     if card.expiry_date < datetime.now().date():
         card.status = 'EXPIRED'
         db.session.commit()
     
-    return render_template('verify.html', card=card)
+    return render_template('verify.html', card=card, status='found')
+
+@app.route('/api/verify/<id_number>')
+def api_verify_card(id_number):
+    """API endpoint for card verification"""
+    card = IDCard.query.filter_by(id_number=id_number).first()
+    
+    if not card:
+        return jsonify({'verified': False, 'message': 'Card not found'}), 404
+    
+    # Check expiry
+    is_expired = card.expiry_date < datetime.now().date()
+    if is_expired:
+        card.status = 'EXPIRED'
+        db.session.commit()
+    
+    return jsonify({
+        'verified': True,
+        'id_number': card.id_number,
+        'full_name': card.full_name,
+        'organization': card.organization,
+        'nationality': card.nationality,
+        'status': card.status,
+        'issue_date': card.issue_date.strftime('%Y-%m-%d'),
+        'expiry_date': card.expiry_date.strftime('%Y-%m-%d'),
+        'is_valid': card.status == 'VALID',
+        'is_expired': is_expired,
+        'is_revoked': card.status == 'REVOKED',
+        'card_png': card.card_png,
+        'has_qr': bool(card.qr_code)
+    })
 
 @app.route('/settings')
 def settings():

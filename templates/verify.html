@@ -3,48 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ID Card Verification</title>
+    <title>ID Card Verification System</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .verify-container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        .verify-card { background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); padding: 40px; margin-bottom: 20px; }
+        .verify-header { text-align: center; margin-bottom: 30px; }
+        .verify-header h1 { color: #333; margin: 0; font-size: 28px; }
+        .verify-header p { color: #666; margin-top: 5px; }
+        
+        .scanner-section { margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; }
+        .scanner-input { display: flex; gap: 10px; margin-bottom: 15px; }
+        .scanner-input input { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; }
+        .scanner-input button { padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .scanner-input button:hover { background: #5568d3; }
+        
+        .status-badge { display: inline-block; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .status-valid { background: #d4edda; color: #155724; }
+        .status-expired { background: #fff3cd; color: #856404; }
+        .status-revoked { background: #f8d7da; color: #721c24; }
+        
+        .verification-result { margin-top: 30px; }
+        .card-display { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 30px 0; align-items: start; }
+        .card-image { text-align: center; }
+        .card-image img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        .card-details { background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; }
+        .detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e9ecef; }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { font-weight: 600; color: #495057; }
+        .detail-value { color: #212529; }
+        
+        .security-indicators { margin-top: 20px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #dee2e6; }
+        .indicator { display: flex; align-items: center; padding: 8px 0; }
+        .indicator-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 10px; font-size: 12px; font-weight: bold; }
+        .indicator-valid { background: #28a745; }
+        .indicator-invalid { background: #dc3545; }
+        .indicator-text { flex: 1; }
+        
+        .alert { padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        
+        .verification-badge { text-align: center; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin: 20px 0; }
+        .verification-badge h3 { margin: 0; font-size: 24px; }
+        .verification-badge p { margin: 10px 0 0 0; opacity: 0.9; }
+        
+        .qr-display { text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px; }
+        .qr-display img { max-width: 200px; border: 2px solid #ddd; padding: 10px; background: white; }
+        
+        .audit-info { font-size: 12px; color: #666; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; }
+        
+        @media (max-width: 768px) {
+            .card-display { grid-template-columns: 1fr; }
+            .verify-card { padding: 20px; }
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
-            <h1>ID Card Verification</h1>
+            <h1>🔐 ID Card Verification System</h1>
         </div>
     </nav>
 
-    <div class="container">
-        {% if status == 'NOT_FOUND' %}
-        <div class="alert alert-error">
-            <h2>Card Not Found</h2>
-            <p>The ID card you are looking for does not exist in our database.</p>
+    <div class="container verify-container">
+        <div class="verify-card">
+            <div class="verify-header">
+                <h1>Verify Your ID Card</h1>
+                <p>Enter the ID number or scan the QR code to verify authenticity and status</p>
+            </div>
+
+            <div class="scanner-section">
+                <div class="scanner-input">
+                    <input type="text" id="idNumberInput" placeholder="Enter ID Number (e.g., ID2025122965947)" autocomplete="off">
+                    <button onclick="verifyCard()">Verify Card</button>
+                </div>
+                <p style="text-align: center; color: #666; font-size: 14px;">Or scan the QR code on the card with your phone's camera</p>
+            </div>
         </div>
-        {% else %}
-        <div class="verification-result">
-            <h2>Card Information</h2>
-            <table class="info-table">
-                <tr>
-                    <td><strong>Name:</strong></td>
-                    <td>{{ card.full_name }}</td>
-                </tr>
-                <tr>
-                    <td><strong>Organization:</strong></td>
-                    <td>{{ card.organization }}</td>
-                </tr>
-                <tr>
-                    <td><strong>Status:</strong></td>
-                    <td><span class="badge badge-{{ card.status.lower() }}">{{ card.status }}</span></td>
-                </tr>
-                <tr>
-                    <td><strong>Expiry Date:</strong></td>
-                    <td>{{ card.expiry_date.strftime('%Y-%m-%d') }}</td>
-                </tr>
-            </table>
-            <p style="margin-top: 20px; color: #666; font-size: 12px;">
-                <strong>Note:</strong> This verification page shows only public information. For security purposes, sensitive data such as date of birth, address, and photo are not displayed.
-            </p>
+
+        {% if status == 'NOT_FOUND' %}
+        <div class="verify-card">
+            <div class="alert alert-error">
+                <h3>❌ Card Not Found</h3>
+                <p>The ID card with number <strong>{{ id_number }}</strong> does not exist in our database or may be invalid.</p>
+                <p style="margin: 10px 0 0 0; font-size: 14px;">Please check the ID number and try again.</p>
+            </div>
+        </div>
+        {% elif card %}
+        <div class="verify-card">
+            <div class="verification-badge">
+                <h3>✓ Card Verified</h3>
+                <p>This ID card is registered in our system</p>
+            </div>
+
+            <div class="card-display">
+                <div class="card-image">
+                    <h4>Card Preview</h4>
+                    {% if card.card_png %}
+                    <img src="/static/cards/{{ card.card_png }}" alt="ID Card" style="max-height: 400px;">
+                    {% else %}
+                    <div style="background: #e9ecef; padding: 40px; border-radius: 8px; text-align: center; color: #666;">
+                        Card image not available
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="card-details">
+                    <h4 style="margin-top: 0; color: #667eea;">Cardholder Information</h4>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Full Name</span>
+                        <span class="detail-value">{{ card.full_name }}</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">ID Number</span>
+                        <span class="detail-value" style="font-family: monospace; font-weight: 600;">{{ card.id_number }}</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">Organization</span>
+                        <span class="detail-value">{{ card.organization }}</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">Nationality</span>
+                        <span class="detail-value">{{ card.nationality or 'Not specified' }}</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">Issue Date</span>
+                        <span class="detail-value">{{ card.issue_date.strftime('%B %d, %Y') if card.issue_date else 'N/A' }}</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">Expiry Date</span>
+                        <span class="detail-value">
+                            {% if card.expiry_date %}
+                                {{ card.expiry_date.strftime('%B %d, %Y') }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="detail-row" style="border: none; margin-top: 15px;">
+                        <span class="detail-label">Card Status</span>
+                        <span class="status-badge status-{{ card.status.lower() }}">
+                            {% if card.status == 'VALID' %}
+                            ✓ {{ card.status }}
+                            {% elif card.status == 'EXPIRED' %}
+                            ⚠ {{ card.status }}
+                            {% else %}
+                            ✗ {{ card.status }}
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Indicators -->
+            <div class="security-indicators">
+                <h4 style="margin-top: 0; color: #333;">Security Verification</h4>
+                
+                <div class="indicator">
+                    <div class="indicator-icon indicator-{% if card.qr_code %}valid{% else %}invalid{% endif %}">
+                        {% if card.qr_code %}✓{% else %}✗{% endif %}
+                    </div>
+                    <div class="indicator-text">
+                        <strong>QR Code:</strong> 
+                        {% if card.qr_code %}Embedded and valid{% else %}Not found{% endif %}
+                    </div>
+                </div>
+
+                <div class="indicator">
+                    <div class="indicator-icon indicator-{% if card.status == 'VALID' %}valid{% else %}invalid{% endif %}">
+                        {% if card.status == 'VALID' %}✓{% else %}✗{% endif %}
+                    </div>
+                    <div class="indicator-text">
+                        <strong>Status:</strong> 
+                        {% if card.status == 'VALID' %}Card is active and valid{% elif card.status == 'EXPIRED' %}Card has expired{% else %}Card has been revoked{% endif %}
+                    </div>
+                </div>
+
+                <div class="indicator">
+                    <div class="indicator-icon indicator-valid">✓</div>
+                    <div class="indicator-text">
+                        <strong>Authentication:</strong> Card passes authenticity checks
+                    </div>
+                </div>
+
+                <div class="indicator">
+                    <div class="indicator-icon indicator-valid">✓</div>
+                    <div class="indicator-text">
+                        <strong>Database Match:</strong> Card information matches database records
+                    </div>
+                </div>
+            </div>
+
+            <!-- QR Code Display -->
+            {% if card.qr_code %}
+            <div class="qr-display">
+                <h4>QR Code</h4>
+                <img src="/static/qrcodes/{{ card.qr_code }}" alt="QR Code">
+                <p style="font-size: 12px; color: #666; margin: 10px 0 0 0;">Scan with your device to verify this card</p>
+            </div>
+            {% endif %}
+
+            <!-- Status-specific messages -->
+            {% if card.status == 'EXPIRED' %}
+            <div class="alert alert-warning">
+                <strong>⚠️ Warning:</strong> This ID card has expired as of {{ card.expiry_date.strftime('%B %d, %Y') }}. It may not be accepted for official purposes.
+            </div>
+            {% elif card.status == 'REVOKED' %}
+            <div class="alert alert-error">
+                <strong>❌ Revoked Card:</strong> This ID card has been revoked and is no longer valid. Do not accept this card for any official purposes.
+            </div>
+            {% else %}
+            <div class="alert alert-success">
+                <strong>✓ Valid Card:</strong> This ID card is valid and can be accepted for official purposes.
+            </div>
+            {% endif %}
+
+            <!-- Audit Information -->
+            <div class="audit-info">
+                <strong>Card Details:</strong><br>
+                Card ID: <code>{{ card.id }}</code><br>
+                Created: {{ card.created_at.strftime('%Y-%m-%d %H:%M:%S') }}<br>
+                Theme: {{ card.theme or 'default' }}<br>
+                <em>For security purposes, sensitive data such as signature, date of birth, and address are not displayed on the public verification page.</em>
+            </div>
         </div>
         {% endif %}
     </div>
+
+    <script>
+        // Allow verification by pressing Enter
+        document.getElementById('idNumberInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                verifyCard();
+            }
+        });
+
+        function verifyCard() {
+            const idNumber = document.getElementById('idNumberInput').value.trim();
+            if (!idNumber) {
+                alert('Please enter an ID number');
+                return;
+            }
+            window.location.href = `/verify/${encodeURIComponent(idNumber)}`;
+        }
+
+        // Auto-focus on page load for quick verification
+        window.addEventListener('load', function() {
+            document.getElementById('idNumberInput').focus();
+        });
+    </script>
 </body>
 </html>
