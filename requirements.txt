@@ -28,3 +28,12 @@ reportlab
 werkzeug
 apscheduler
 onnxruntime
+apscheduler
+flask
+flask-sqlalchemy
+onnxruntime
+pillow
+python-dateutil
+qrcode
+reportlab
+werkzeug
