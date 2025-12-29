@@ -214,6 +214,11 @@ def generate_card():
         print(f"Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@app.route('/verify/')
+def verify_card_form():
+    """Display verification form without pre-filled ID"""
+    return render_template('verify.html', status='form')
+
 @app.route('/verify/<id_number>')
 def verify_card(id_number):
     card = IDCard.query.filter_by(id_number=id_number).first()
