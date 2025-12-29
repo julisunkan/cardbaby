@@ -66,10 +66,18 @@ def apply_watermark(card_image, watermark_text, color, opacity, position):
     
     return card_image
 
+def require_admin():
+    """Decorator to require admin authentication"""
+    if 'admin_user' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    return None
+
 @app.before_request
 def before_request():
     if request.endpoint and 'admin' in request.endpoint:
-        if 'admin_user' not in session and request.endpoint != 'admin_login':
+        if 'admin_user' not in session and request.endpoint not in ['admin_login']:
+            if request.endpoint in ['view_card', 'get_template', 'download_card']:
+                return jsonify({'error': 'Unauthorized'}), 401
             return redirect('/admin/login')
 
 @app.route('/')
@@ -89,7 +97,7 @@ def generate_card():
         template_id = request.form.get('template_id', 1)
         
         # Get template
-        template = CardTemplate.query.get(template_id)
+        template = CardTemplate.query.filter_by(id=template_id).first()
         if not template:
             return jsonify({'error': 'Template not found'}), 400
         
@@ -219,7 +227,11 @@ def admin_dashboard():
 
 @app.route('/admin/card/<int:card_id>/view')
 def view_card(card_id):
-    card = IDCard.query.get(card_id)
+    auth_error = require_admin()
+    if auth_error:
+        return auth_error
+    
+    card = IDCard.query.filter_by(id=card_id).first()
     if not card:
         return jsonify({'error': 'Card not found'}), 404
     
@@ -237,7 +249,11 @@ def view_card(card_id):
 
 @app.route('/admin/template/<int:template_id>')
 def get_template(template_id):
-    template = CardTemplate.query.get(template_id)
+    auth_error = require_admin()
+    if auth_error:
+        return auth_error
+    
+    template = CardTemplate.query.filter_by(id=template_id).first()
     if not template:
         return jsonify({'error': 'Template not found'}), 404
     
@@ -250,7 +266,7 @@ def get_template(template_id):
 
 @app.route('/admin/card/<int:card_id>/revoke', methods=['POST'])
 def revoke_card(card_id):
-    card = IDCard.query.get(card_id)
+    card = IDCard.query.filter_by(id=card_id).first()
     if card:
         card.status = 'REVOKED'
         db.session.commit()
@@ -260,7 +276,7 @@ def revoke_card(card_id):
 
 @app.route('/admin/card/<int:card_id>/enable', methods=['POST'])
 def enable_card(card_id):
-    card = IDCard.query.get(card_id)
+    card = IDCard.query.filter_by(id=card_id).first()
     if card:
         card.status = 'VALID'
         db.session.commit()
@@ -290,7 +306,8 @@ def update_watermark():
 @app.route('/admin/template', methods=['POST'])
 def save_template():
     data = request.json
-    template = CardTemplate.query.get(data.get('id'))
+    template_id = data.get('id')
+    template = CardTemplate.query.filter_by(id=template_id).first() if template_id else None
     
     if not template:
         template = CardTemplate(name=data.get('name'))
@@ -305,18 +322,26 @@ def save_template():
     
     return jsonify({'success': True, 'template_id': template.id})
 
-@app.route('/admin/card/<int:card_id>/download/<format>')
-def download_card(card_id, format):
-    card = IDCard.query.get(card_id)
-    if not card:
-        return 'Card not found', 404
+@app.route('/admin/card/<int:card_id>/download/<file_format>')
+def download_card(card_id, file_format):
+    auth_error = require_admin()
+    if auth_error:
+        return auth_error
     
-    if format == 'png':
+    card = IDCard.query.filter_by(id=card_id).first()
+    if not card:
+        return jsonify({'error': 'Card not found'}), 404
+    
+    if file_format == 'png':
+        if not os.path.exists(os.path.join('static/cards', card.card_png)):
+            return jsonify({'error': 'Card image not found'}), 404
         return send_from_directory('static/cards', card.card_png)
-    elif format == 'pdf':
+    elif file_format == 'pdf':
+        if not os.path.exists(os.path.join('static/pdfs', card.card_pdf)):
+            return jsonify({'error': 'Card PDF not found'}), 404
         return send_from_directory('static/pdfs', card.card_pdf)
     
-    return 'Invalid format', 400
+    return jsonify({'error': 'Invalid format. Use "png" or "pdf"'}), 400
 
 def init_db():
     with app.app_context():
@@ -351,6 +376,14 @@ def init_db():
             db.session.add(admin)
             
             db.session.commit()
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({'error': 'Resource not found'}), 404
+
+@app.errorhandler(500)
+def server_error(error):
+    return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
     init_db()
