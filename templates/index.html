@@ -515,7 +515,7 @@
 
         function downloadFile(format) {
             if (!currentCard) {
-                alert('No card generated yet');
+                showNotification('No card generated yet', 'error');
                 return;
             }
             const fileName = format === 'png' ? currentCard.card_png : currentCard.card_pdf;
@@ -649,10 +649,10 @@
                     document.getElementById('result').style.display = 'block';
                     document.getElementById('cardPreview').innerHTML = `<img src="/static/cards/${result.card_png}?t=${Date.now()}" alt="Generated Card">`;
                 } else {
-                    alert('Error: ' + (result.error || 'Unknown error'));
+                    showNotification('Error: ' + (result.error || 'Unknown error'), 'error');
                 }
             } catch (error) {
-                alert('Error: ' + error.message);
+                showNotification('Error: ' + error.message, 'error');
             }
         });
     </script>
