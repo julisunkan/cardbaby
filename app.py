@@ -66,19 +66,6 @@ def apply_watermark(card_image, watermark_text, color, opacity, position):
     
     return card_image
 
-def require_admin():
-    """Decorator to require admin authentication"""
-    if 'admin_user' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    return None
-
-@app.before_request
-def before_request():
-    if request.endpoint and 'admin' in request.endpoint:
-        if 'admin_user' not in session and request.endpoint not in ['admin_login']:
-            if request.endpoint in ['view_card', 'get_template', 'download_card']:
-                return jsonify({'error': 'Unauthorized'}), 401
-            return redirect('/admin/login')
 
 @app.route('/')
 def index():
@@ -200,99 +187,13 @@ def verify_card(id_number):
     
     return render_template('verify.html', card=card)
 
-@app.route('/admin/login', methods=['GET', 'POST'])
-def admin_login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        
-        admin = AdminUser.query.filter_by(username=username).first()
-        if admin and check_password_hash(admin.password_hash, password):
-            session['admin_user'] = username
-            add_audit_log('Admin Login')
-            return redirect('/admin/dashboard')
-        
-        return render_template('login.html', error='Invalid credentials')
-    
-    return render_template('login.html')
-
-@app.route('/admin/logout')
-def admin_logout():
-    add_audit_log('Admin Logout')
-    session.pop('admin_user', None)
-    return redirect('/')
-
-@app.route('/admin/dashboard')
-def admin_dashboard():
-    page = request.args.get('page', 1, type=int)
-    cards = IDCard.query.paginate(page=page, per_page=10)
+@app.route('/settings')
+def settings():
     templates = CardTemplate.query.all()
     watermark = Watermark.query.first()
-    logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(20).all()
-    
-    return render_template('dashboard.html', cards=cards, templates=templates, 
-                         watermark=watermark, logs=logs)
+    return render_template('settings.html', templates=templates, watermark=watermark)
 
-@app.route('/admin/card/<int:card_id>/view')
-def view_card(card_id):
-    auth_error = require_admin()
-    if auth_error:
-        return auth_error
-    
-    card = IDCard.query.filter_by(id=card_id).first()
-    if not card:
-        return jsonify({'error': 'Card not found'}), 404
-    
-    return jsonify({
-        'id_number': card.id_number,
-        'full_name': card.full_name,
-        'date_of_birth': card.date_of_birth.strftime('%Y-%m-%d'),
-        'organization': card.organization,
-        'address': card.address,
-        'issue_date': card.issue_date.strftime('%Y-%m-%d'),
-        'expiry_date': card.expiry_date.strftime('%Y-%m-%d'),
-        'status': card.status,
-        'card_png': card.card_png
-    })
-
-@app.route('/admin/template/<int:template_id>')
-def get_template(template_id):
-    auth_error = require_admin()
-    if auth_error:
-        return auth_error
-    
-    template = CardTemplate.query.filter_by(id=template_id).first()
-    if not template:
-        return jsonify({'error': 'Template not found'}), 404
-    
-    return jsonify({
-        'id': template.id,
-        'name': template.name,
-        'config': template.get_config(),
-        'is_active': template.is_active
-    })
-
-@app.route('/admin/card/<int:card_id>/revoke', methods=['POST'])
-def revoke_card(card_id):
-    card = IDCard.query.filter_by(id=card_id).first()
-    if card:
-        card.status = 'REVOKED'
-        db.session.commit()
-        add_audit_log('Card Revoked', card_id)
-        return jsonify({'success': True})
-    return jsonify({'error': 'Card not found'}), 404
-
-@app.route('/admin/card/<int:card_id>/enable', methods=['POST'])
-def enable_card(card_id):
-    card = IDCard.query.filter_by(id=card_id).first()
-    if card:
-        card.status = 'VALID'
-        db.session.commit()
-        add_audit_log('Card Enabled', card_id)
-        return jsonify({'success': True})
-    return jsonify({'error': 'Card not found'}), 404
-
-@app.route('/admin/watermark', methods=['POST'])
+@app.route('/api/watermark', methods=['POST'])
 def update_watermark():
     data = request.json
     watermark = Watermark.query.first()
@@ -307,11 +208,10 @@ def update_watermark():
     
     db.session.add(watermark)
     db.session.commit()
-    add_audit_log('Watermark Updated')
     
     return jsonify({'success': True})
 
-@app.route('/admin/template', methods=['POST'])
+@app.route('/api/template', methods=['POST'])
 def save_template():
     data = request.json
     template_id = data.get('id')
@@ -326,52 +226,48 @@ def save_template():
     
     db.session.add(template)
     db.session.commit()
-    add_audit_log('Template Updated')
     
     return jsonify({'success': True, 'template_id': template.id})
-
-@app.route('/admin/card/<int:card_id>/download/<file_format>')
-def download_card(card_id, file_format):
-    auth_error = require_admin()
-    if auth_error:
-        return auth_error
-    
-    card = IDCard.query.filter_by(id=card_id).first()
-    if not card:
-        return jsonify({'error': 'Card not found'}), 404
-    
-    if file_format == 'png':
-        if not os.path.exists(os.path.join('static/cards', card.card_png)):
-            return jsonify({'error': 'Card image not found'}), 404
-        return send_from_directory('static/cards', card.card_png)
-    elif file_format == 'pdf':
-        if not os.path.exists(os.path.join('static/pdfs', card.card_pdf)):
-            return jsonify({'error': 'Card PDF not found'}), 404
-        return send_from_directory('static/pdfs', card.card_pdf)
-    
-    return jsonify({'error': 'Invalid format. Use "png" or "pdf"'}), 400
 
 def init_db():
     with app.app_context():
         db.create_all()
         
-        # Create default template
+        # Create 11 colorful templates
         if CardTemplate.query.count() == 0:
-            default_config = {
-                'width': 1000,
-                'height': 600,
-                'background_color': '#ffffff',
-                'header_height': 120,
-                'header_color': '#003366',
-                'photo_x': 30,
-                'photo_y': 160,
-                'text_x': 230,
-                'text_y': 160,
-                'qr_x': 800,
-                'qr_y': 400,
-                'qr_size': 120
-            }
-            template = CardTemplate(name='Default', is_active=True)
+            templates = [
+                {'name': 'Passport Pro', 'header_color': '#1a3a52', 'photo_bg': '#003d7a'},
+                {'name': 'Ocean Blue', 'header_color': '#0066cc', 'photo_bg': '#0088ff'},
+                {'name': 'Forest Green', 'header_color': '#1b5e20', 'photo_bg': '#2e7d32'},
+                {'name': 'Sunset Red', 'header_color': '#c62828', 'photo_bg': '#d32f2f'},
+                {'name': 'Royal Purple', 'header_color': '#512da8', 'photo_bg': '#673ab7'},
+                {'name': 'Autumn Gold', 'header_color': '#e65100', 'photo_bg': '#ff6f00'},
+                {'name': 'Mint Fresh', 'header_color': '#00695c', 'photo_bg': '#00897b'},
+                {'name': 'Rose Pink', 'header_color': '#880e4f', 'photo_bg': '#c2185b'},
+                {'name': 'Deep Teal', 'header_color': '#004d73', 'photo_bg': '#0288d1'},
+                {'name': 'Charcoal Pro', 'header_color': '#1a1a1a', 'photo_bg': '#424242'},
+                {'name': 'Corporate Navy', 'header_color': '#1a237e', 'photo_bg': '#3949ab'}
+            ]
+            
+            for tmpl in templates:
+                config = {
+                    'width': 1000,
+                    'height': 650,
+                    'background_color': '#ffffff',
+                    'header_height': 80,
+                    'header_color': tmpl['header_color'],
+                    'photo_bg_color': tmpl['photo_bg'],
+                    'photo_x': 30,
+                    'photo_y': 100,
+                    'text_x': 300,
+                    'text_y': 100,
+                    'qr_x': 850,
+                    'qr_y': 550,
+                    'qr_size': 100
+                }
+                    template = CardTemplate(name=tmpl['name'], is_active=True)
+                template.set_config(config)
+                db.session.add(template)
             template.set_config(default_config)
             db.session.add(template)
             
