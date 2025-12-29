@@ -61,11 +61,10 @@ class CardGenerator:
         return card
     
     def add_photo_section(self, card, photo_path):
-        draw = ImageDraw.Draw(card)
-        photo_bg_rgb = self.hex_to_rgb(self.photo_bg_color)
         photo_section_width = 160
         photo_section_height = self.height - self.header_height - 60
-        draw.rectangle((0, self.header_height, photo_section_width, self.header_height + photo_section_height), fill=photo_bg_rgb)
+        
+        # We don't draw a solid rectangle background anymore to allow blending with card background
         
         if photo_path and os.path.exists(photo_path):
             try:
@@ -84,6 +83,9 @@ class CardGenerator:
                 
                 photo_x = (photo_section_width - photo_size) // 2
                 photo_y = self.header_height + 20
+                
+                # Draw a subtle border instead of a background rectangle
+                draw = ImageDraw.Draw(card)
                 draw.rectangle((photo_x - 2, photo_y - 2, photo_x + photo_size + 2, photo_y + photo_size + 2), outline=(255, 255, 255), width=2)
                 
                 # Paste with alpha mask to preserve transparency
