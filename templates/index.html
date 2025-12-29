@@ -561,6 +561,7 @@
             const fontItalic = formFields.font_italic.checked;
             const backgroundImage = formFields.background_image.value;
             const nationality = formFields.nationality.value;
+            const templateId = formFields.template_id.value;
 
             if (!fullName || !idNumber || !org || !dob || !issue || !expiry || !nationality) {
                 document.getElementById('previewContainer').innerHTML = '<div class="preview-placeholder">Fill form to see preview</div>';
@@ -575,6 +576,21 @@
             else if (theme === 'orange') headerColor = '#ff8c00';
             else if (theme === 'gold') headerColor = '#8b6914';
 
+            // Fetch template config to get the header color
+            fetch(`/api/template/${templateId}`)
+                .then(r => r.json())
+                .then(template => {
+                    if (template.config && template.config.header_color) {
+                        headerColor = template.config.header_color;
+                    }
+                    renderPreview(fullName, idNumber, org, dob, issue, expiry, theme, fontSize, fontFamily, fontColor, fontBold, fontItalic, backgroundImage, nationality, headerColor);
+                })
+                .catch(() => {
+                    renderPreview(fullName, idNumber, org, dob, issue, expiry, theme, fontSize, fontFamily, fontColor, fontBold, fontItalic, backgroundImage, nationality, headerColor);
+                });
+        }
+
+        function renderPreview(fullName, idNumber, org, dob, issue, expiry, theme, fontSize, fontFamily, fontColor, fontBold, fontItalic, backgroundImage, nationality, headerColor) {
             let bgStyle = 'background-color: #fff;';
             if (backgroundImage) {
                 bgStyle = `background-image: url('/static/backgrounds/${backgroundImage}'); background-size: cover;`;

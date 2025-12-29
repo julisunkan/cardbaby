@@ -332,6 +332,8 @@ def init_db():
             db.session.execute(db.text('ALTER TABLE id_cards ADD COLUMN font_bold BOOLEAN DEFAULT 0'))
         if 'font_italic' not in columns:
             db.session.execute(db.text('ALTER TABLE id_cards ADD COLUMN font_italic BOOLEAN DEFAULT 0'))
+        if 'nationality' not in columns:
+            db.session.execute(db.text('ALTER TABLE id_cards ADD COLUMN nationality VARCHAR(100)'))
         db.session.commit()
         
         # Delete old templates and create modern ones
