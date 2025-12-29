@@ -176,7 +176,7 @@ class CardGenerator:
         
         y2 = y1 + item_spacing
         draw.text((info_x, y2), "NATIONALITY", fill=label_color, font=label_small_font)
-        draw.text((info_x, y2 + 10), data.get('organization', '')[:3].upper() or 'USA', fill=value_color, font=value_font)
+        draw.text((info_x, y2 + 10), data.get('nationality', '')[:15].upper() or 'UNKNOWN', fill=value_color, font=value_font)
         draw.text((info_x_right, y2), "DATE OF BIRTH", fill=label_color, font=label_small_font)
         draw.text((info_x_right, y2 + 10), data.get('date_of_birth', ''), fill=value_color, font=value_font)
         

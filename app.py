@@ -180,6 +180,7 @@ def generate_card():
             date_of_birth=datetime.strptime(data.get('date_of_birth'), '%Y-%m-%d').date(),
             organization=data.get('organization'),
             address=data.get('address'),
+            nationality=data.get('nationality'),
             issue_date=datetime.strptime(data.get('issue_date'), '%Y-%m-%d').date(),
             expiry_date=datetime.strptime(data.get('expiry_date'), '%Y-%m-%d').date(),
             signature=data.get('signature', ''),
