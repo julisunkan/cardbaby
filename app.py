@@ -211,6 +211,37 @@ def admin_dashboard():
     return render_template('dashboard.html', cards=cards, templates=templates, 
                          watermark=watermark, logs=logs)
 
+@app.route('/admin/card/<int:card_id>/view')
+def view_card(card_id):
+    card = IDCard.query.get(card_id)
+    if not card:
+        return jsonify({'error': 'Card not found'}), 404
+    
+    return jsonify({
+        'id_number': card.id_number,
+        'full_name': card.full_name,
+        'date_of_birth': card.date_of_birth.strftime('%Y-%m-%d'),
+        'organization': card.organization,
+        'address': card.address,
+        'issue_date': card.issue_date.strftime('%Y-%m-%d'),
+        'expiry_date': card.expiry_date.strftime('%Y-%m-%d'),
+        'status': card.status,
+        'card_png': card.card_png
+    })
+
+@app.route('/admin/template/<int:template_id>')
+def get_template(template_id):
+    template = CardTemplate.query.get(template_id)
+    if not template:
+        return jsonify({'error': 'Template not found'}), 404
+    
+    return jsonify({
+        'id': template.id,
+        'name': template.name,
+        'config': template.get_config(),
+        'is_active': template.is_active
+    })
+
 @app.route('/admin/card/<int:card_id>/revoke', methods=['POST'])
 def revoke_card(card_id):
     card = IDCard.query.get(card_id)

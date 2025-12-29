@@ -18,79 +18,88 @@
     </nav>
 
     <div class="container">
-        <div class="form-section">
-            <h2>Generate Your ID Card</h2>
-            <form id="cardForm" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label>Full Name*</label>
-                    <input type="text" name="full_name" required>
-                </div>
-
-                <div class="form-row">
+        <div class="form-container">
+            <div class="form-section">
+                <h2>Generate Your ID Card</h2>
+                <form id="cardForm" enctype="multipart/form-data">
                     <div class="form-group">
-                        <label>Date of Birth*</label>
-                        <input type="date" name="date_of_birth" required>
+                        <label>Full Name*</label>
+                        <input type="text" name="full_name" required onchange="updatePreview()">
                     </div>
-                    <div class="form-group">
-                        <label>Unique ID Number*</label>
-                        <input type="text" name="id_number" required>
-                    </div>
-                </div>
 
-                <div class="form-group">
-                    <label>Organization*</label>
-                    <input type="text" name="organization" required placeholder="Company/University/Organization">
-                </div>
-
-                <div class="form-group">
-                    <label>Address*</label>
-                    <textarea name="address" required rows="2"></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Issue Date*</label>
-                        <input type="date" name="issue_date" required>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Date of Birth*</label>
+                            <input type="date" name="date_of_birth" required onchange="updatePreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Unique ID Number*</label>
+                            <input type="text" name="id_number" required onchange="updatePreview()">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Expiry Date*</label>
-                        <input type="date" name="expiry_date" required>
-                    </div>
-                </div>
 
-                <div class="form-row">
                     <div class="form-group">
-                        <label>Signature</label>
-                        <input type="text" name="signature" placeholder="Signature text">
+                        <label>Organization*</label>
+                        <input type="text" name="organization" required placeholder="Company/University/Organization" onchange="updatePreview()">
                     </div>
+
                     <div class="form-group">
-                        <label>Theme</label>
-                        <select name="theme">
-                            <option value="default">Default (Blue)</option>
-                            <option value="green">Green</option>
-                            <option value="red">Red</option>
-                            <option value="corporate">Corporate</option>
+                        <label>Address*</label>
+                        <textarea name="address" required rows="2" onchange="updatePreview()"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Issue Date*</label>
+                            <input type="date" name="issue_date" required onchange="updatePreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Expiry Date*</label>
+                            <input type="date" name="expiry_date" required onchange="updatePreview()">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Signature</label>
+                            <input type="text" name="signature" placeholder="Signature text">
+                        </div>
+                        <div class="form-group">
+                            <label>Theme</label>
+                            <select name="theme" onchange="updatePreview()">
+                                <option value="default">Default (Blue)</option>
+                                <option value="green">Green</option>
+                                <option value="red">Red</option>
+                                <option value="corporate">Corporate</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Card Template</label>
+                        <select name="template_id" onchange="updatePreview()">
+                            {% for template in templates %}
+                            <option value="{{ template.id }}">{{ template.name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label>Card Template</label>
-                    <select name="template_id">
-                        {% for template in templates %}
-                        <option value="{{ template.id }}">{{ template.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label>Upload Photo (Optional)</label>
+                        <input type="file" name="photo" accept="image/*" onchange="handlePhotoUpload()">
+                        <small>PNG, JPG, GIF. Max 16MB.</small>
+                    </div>
 
-                <div class="form-group">
-                    <label>Upload Photo (Optional)</label>
-                    <input type="file" name="photo" accept="image/*">
-                    <small>PNG, JPG, GIF. Max 16MB.</small>
-                </div>
+                    <button type="submit" class="btn btn-primary">Generate Card</button>
+                </form>
+            </div>
 
-                <button type="submit" class="btn btn-primary">Generate Card</button>
-            </form>
+            <div class="preview-section">
+                <h2>Live Preview</h2>
+                <div id="previewContainer" class="card-preview-box">
+                    <div class="preview-placeholder">Fill form to see preview</div>
+                </div>
+            </div>
         </div>
 
         <div id="result" class="result-section" style="display: none;">
@@ -99,11 +108,57 @@
             <div class="btn-group">
                 <a id="downloadPng" href="#" class="btn btn-success">Download as PNG</a>
                 <a id="downloadPdf" href="#" class="btn btn-success">Download as PDF</a>
+                <button onclick="location.href='/'" class="btn btn-primary">Generate Another</button>
             </div>
         </div>
     </div>
 
     <script>
+        function updatePreview() {
+            const formFields = document.getElementById('cardForm');
+            const fullName = formFields.full_name.value;
+            const idNumber = formFields.id_number.value;
+            const org = formFields.organization.value;
+            const dob = formFields.date_of_birth.value;
+            const issue = formFields.issue_date.value;
+            const expiry = formFields.expiry_date.value;
+            const theme = formFields.theme.value;
+
+            if (!fullName || !idNumber || !org || !dob || !issue || !expiry) {
+                document.getElementById('previewContainer').innerHTML = '<div class="preview-placeholder">Fill form to see preview</div>';
+                return;
+            }
+
+            let headerColor = '#003366';
+            if (theme === 'green') headerColor = '#006633';
+            else if (theme === 'red') headerColor = '#cc0000';
+            else if (theme === 'corporate') headerColor = '#1a1a1a';
+
+            const previewHTML = `
+                <div class="card-preview" style="background-color: #fff; border: 1px solid #ddd; border-radius: 4px;">
+                    <div class="card-header" style="background-color: ${headerColor}; color: white; padding: 15px; font-weight: bold; border-radius: 4px 4px 0 0;">
+                        ${org}
+                    </div>
+                    <div class="card-content" style="padding: 15px; font-size: 13px;">
+                        <div><strong>Name:</strong> ${fullName}</div>
+                        <div><strong>ID:</strong> ${idNumber}</div>
+                        <div><strong>DOB:</strong> ${dob}</div>
+                        <div><strong>Organization:</strong> ${org}</div>
+                        <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+                            <div><strong>Issue:</strong> ${issue}</div>
+                            <div><strong>Expires:</strong> ${expiry}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('previewContainer').innerHTML = previewHTML;
+        }
+
+        function handlePhotoUpload() {
+            updatePreview();
+        }
+
         document.getElementById('cardForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -118,9 +173,9 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    document.querySelector('.form-section').style.display = 'none';
+                    document.querySelector('.form-container').style.display = 'none';
                     document.getElementById('result').style.display = 'block';
-                    document.getElementById('cardPreview').innerHTML = `<img src="/static/cards/${result.card_png}" alt="Generated Card">`;
+                    document.getElementById('cardPreview').innerHTML = `<img src="/static/cards/${result.card_png}?t=${Date.now()}" alt="Generated Card">`;
                     document.getElementById('downloadPng').href = `/static/cards/${result.card_png}`;
                     document.getElementById('downloadPdf').href = `/static/pdfs/${result.card_pdf}`;
                 } else {

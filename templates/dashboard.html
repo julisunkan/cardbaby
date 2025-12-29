@@ -111,12 +111,12 @@
         <!-- Templates Tab -->
         <div id="templates" class="tab-content">
             <h2>Card Templates</h2>
-            <button onclick="addTemplate()" class="btn btn-primary">Add Template</button>
+            <button onclick="openAddTemplateModal()" class="btn btn-primary">Add Template</button>
             <div id="templatesList" style="margin-top: 20px;">
                 {% for template in templates %}
                 <div class="template-card">
                     <h3>{{ template.name }}</h3>
-                    <button class="btn-sm btn-primary" onclick="editTemplate({{ template.id }})">Edit</button>
+                    <button class="btn-sm btn-primary" onclick="openEditTemplateModal({{ template.id }}, '{{ template.name }}')">Edit</button>
                     {% if not template.is_active %}<span class="badge">Inactive</span>{% endif %}
                 </div>
                 {% endfor %}
@@ -146,6 +146,104 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Card View Modal -->
+    <div id="cardModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeCardModal()">&times;</span>
+            <h2>ID Card Preview</h2>
+            <div id="cardModalBody"></div>
+        </div>
+    </div>
+
+    <!-- Template Modal -->
+    <div id="templateModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeTemplateModal()">&times;</span>
+            <h2 id="templateModalTitle">Add Template</h2>
+            <form id="templateForm">
+                <input type="hidden" id="templateId" name="template_id">
+                
+                <div class="form-group">
+                    <label>Template Name*</label>
+                    <input type="text" id="templateName" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Card Width (pixels)</label>
+                    <input type="number" id="cardWidth" name="width" value="1000" min="500">
+                </div>
+
+                <div class="form-group">
+                    <label>Card Height (pixels)</label>
+                    <input type="number" id="cardHeight" name="height" value="600" min="300">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Header Height</label>
+                        <input type="number" id="headerHeight" name="header_height" value="120" min="50">
+                    </div>
+                    <div class="form-group">
+                        <label>Header Color</label>
+                        <input type="color" id="headerColor" name="header_color" value="#003366">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Background Color</label>
+                    <input type="color" id="bgColor" name="background_color" value="#ffffff">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Photo X Position</label>
+                        <input type="number" id="photoX" name="photo_x" value="30" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Photo Y Position</label>
+                        <input type="number" id="photoY" name="photo_y" value="160" min="0">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Text X Position</label>
+                        <input type="number" id="textX" name="text_x" value="230" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Text Y Position</label>
+                        <input type="number" id="textY" name="text_y" value="160" min="0">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>QR X Position</label>
+                        <input type="number" id="qrX" name="qr_x" value="800" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>QR Y Position</label>
+                        <input type="number" id="qrY" name="qr_y" value="400" min="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>QR Size</label>
+                    <input type="number" id="qrSize" name="qr_size" value="120" min="50">
+                </div>
+
+                <div class="form-group">
+                    <label><input type="checkbox" id="templateActive" name="is_active" checked> Active</label>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Save Template</button>
+                    <button type="button" class="btn" onclick="closeTemplateModal()">Cancel</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -196,15 +294,119 @@
         });
 
         function viewCard(cardId) {
-            alert('View card feature - integrate with modal');
+            fetch(`/admin/card/${cardId}/view`)
+                .then(r => r.json())
+                .then(data => {
+                    const html = `
+                        <div class="card-detail-view">
+                            <table class="detail-table">
+                                <tr><td><strong>ID Number:</strong></td><td>${data.id_number}</td></tr>
+                                <tr><td><strong>Name:</strong></td><td>${data.full_name}</td></tr>
+                                <tr><td><strong>Organization:</strong></td><td>${data.organization}</td></tr>
+                                <tr><td><strong>DOB:</strong></td><td>${data.date_of_birth}</td></tr>
+                                <tr><td><strong>Address:</strong></td><td>${data.address}</td></tr>
+                                <tr><td><strong>Issue Date:</strong></td><td>${data.issue_date}</td></tr>
+                                <tr><td><strong>Expiry Date:</strong></td><td>${data.expiry_date}</td></tr>
+                                <tr><td><strong>Status:</strong></td><td><span class="badge badge-${data.status.toLowerCase()}">${data.status}</span></td></tr>
+                            </table>
+                            <div style="margin-top: 20px; text-align: center;">
+                                <img src="/static/cards/${data.card_png}?t=${Date.now()}" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('cardModalBody').innerHTML = html;
+                    document.getElementById('cardModal').style.display = 'block';
+                });
         }
 
-        function editTemplate(templateId) {
-            alert('Edit template feature - integrate with modal');
+        function closeCardModal() {
+            document.getElementById('cardModal').style.display = 'none';
         }
 
-        function addTemplate() {
-            alert('Add template feature - integrate with modal');
+        function openAddTemplateModal() {
+            document.getElementById('templateId').value = '';
+            document.getElementById('templateName').value = '';
+            document.getElementById('templateModalTitle').textContent = 'Add New Template';
+            document.getElementById('templateForm').reset();
+            document.getElementById('templateModal').style.display = 'block';
+        }
+
+        function openEditTemplateModal(templateId, templateName) {
+            fetch(`/admin/template/${templateId}`)
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('templateId').value = templateId;
+                    document.getElementById('templateName').value = data.name;
+                    document.getElementById('cardWidth').value = data.config.width || 1000;
+                    document.getElementById('cardHeight').value = data.config.height || 600;
+                    document.getElementById('headerHeight').value = data.config.header_height || 120;
+                    document.getElementById('headerColor').value = data.config.header_color || '#003366';
+                    document.getElementById('bgColor').value = data.config.background_color || '#ffffff';
+                    document.getElementById('photoX').value = data.config.photo_x || 30;
+                    document.getElementById('photoY').value = data.config.photo_y || 160;
+                    document.getElementById('textX').value = data.config.text_x || 230;
+                    document.getElementById('textY').value = data.config.text_y || 160;
+                    document.getElementById('qrX').value = data.config.qr_x || 800;
+                    document.getElementById('qrY').value = data.config.qr_y || 400;
+                    document.getElementById('qrSize').value = data.config.qr_size || 120;
+                    document.getElementById('templateActive').checked = data.is_active;
+                    
+                    document.getElementById('templateModalTitle').textContent = 'Edit Template';
+                    document.getElementById('templateModal').style.display = 'block';
+                });
+        }
+
+        function closeTemplateModal() {
+            document.getElementById('templateModal').style.display = 'none';
+        }
+
+        document.getElementById('templateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const config = {
+                width: parseInt(document.getElementById('cardWidth').value),
+                height: parseInt(document.getElementById('cardHeight').value),
+                header_height: parseInt(document.getElementById('headerHeight').value),
+                header_color: document.getElementById('headerColor').value,
+                background_color: document.getElementById('bgColor').value,
+                photo_x: parseInt(document.getElementById('photoX').value),
+                photo_y: parseInt(document.getElementById('photoY').value),
+                text_x: parseInt(document.getElementById('textX').value),
+                text_y: parseInt(document.getElementById('textY').value),
+                qr_x: parseInt(document.getElementById('qrX').value),
+                qr_y: parseInt(document.getElementById('qrY').value),
+                qr_size: parseInt(document.getElementById('qrSize').value)
+            };
+
+            const data = {
+                id: document.getElementById('templateId').value || null,
+                name: document.getElementById('templateName').value,
+                config: config,
+                is_active: document.getElementById('templateActive').checked
+            };
+
+            const response = await fetch('/admin/template', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                alert('Template saved!');
+                closeTemplateModal();
+                location.reload();
+            } else {
+                alert('Error: ' + (result.error || 'Failed to save template'));
+            }
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const cardModal = document.getElementById('cardModal');
+            const templateModal = document.getElementById('templateModal');
+            if (event.target === cardModal) cardModal.style.display = 'none';
+            if (event.target === templateModal) templateModal.style.display = 'none';
         }
     </script>
 </body>

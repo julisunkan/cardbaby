@@ -11,6 +11,7 @@ A full-stack Flask web application for generating professional ID cards with cus
 - Photo upload (PNG, JPG, GIF)
 - Theme selection
 - Output as PNG image and PDF download
+- **Live Card Preview** - Real-time preview updates as you fill the form
 
 ### 2. Card Templates (Database-Driven)
 - Default template with configurable dimensions
@@ -32,19 +33,27 @@ A full-stack Flask web application for generating professional ID cards with cus
 - Admin login/logout with hashed passwords
 - Default credentials: username `admin`, password `admin123`
 - Dashboard with tabs for:
-  - **Cards Tab**: View all generated cards, revoke/enable status, download PNG/PDF
+  - **Cards Tab**: View all generated cards with modal preview, revoke/enable status, download PNG/PDF
   - **Watermark Tab**: Customize watermark (text, color, opacity, position)
-  - **Templates Tab**: Manage card templates
+  - **Templates Tab**: Create, edit, and manage card templates with interactive modal
   - **Audit Log**: Track all admin actions
 
-### 5. Watermark System
+### 5. Interactive Modals
+- **Card Preview Modal**: Click "View" to see full card details and generated card image
+- **Template Editor Modal**: Add/edit card templates with visual form controls for:
+  - Card dimensions (width/height)
+  - Colors (header, background)
+  - Element positions (photo, text, QR code)
+  - Size adjustments
+
+### 6. Watermark System
 - Customizable text, color (hex), opacity (0-255)
 - Position options: top, center, bottom
 - Enable/disable toggle
 - Applied dynamically during card generation
 - Default: "STAFF" watermark
 
-### 6. Additional Features
+### 7. Additional Features
 - Audit logging for admin actions
 - Card status management (VALID/REVOKED/EXPIRED)
 - Automatic expiry detection
@@ -70,17 +79,19 @@ A full-stack Flask web application for generating professional ID cards with cus
 ## How to Use
 
 ### Generate an ID Card
-1. Fill the form on the homepage with:
+1. **Fill the form** on the homepage - as you type, the **Live Preview** on the right updates in real-time
+2. Enter required details:
    - Full name
    - Date of birth
    - Unique ID number
    - Organization
    - Address
    - Issue and expiry dates
-   - Optional: signature, theme, photo upload
-2. Select card template
-3. Click "Generate Card"
-4. Download as PNG or PDF
+3. Optional: Add signature, select theme, upload photo
+4. Select card template from dropdown
+5. Click **Generate Card**
+6. Download as PNG or PDF
+7. Click **Generate Another** to create more cards
 
 ### Verify a Card
 - Use QR code on the card or navigate to `/verify/<id_number>`
@@ -89,7 +100,17 @@ A full-stack Flask web application for generating professional ID cards with cus
 ### Admin Access
 1. Navigate to `/admin/login`
 2. Login with: `admin` / `admin123`
-3. Manage cards, customize watermarks, edit templates, view audit logs
+3. **Cards Tab**: 
+   - Click **View** to see card details in a modal popup
+   - Revoke or enable cards
+   - Download PNG or PDF
+   - Pagination for browsing many cards
+4. **Templates Tab**:
+   - Click **Add Template** to create a new template
+   - Click **Edit** to modify existing template with modal editor
+   - Control card layout, colors, and element positions
+5. **Watermark Tab**: Customize how watermarks appear on generated cards
+6. **Audit Log**: Track all admin actions with timestamps
 
 ## File Structure
 ```
