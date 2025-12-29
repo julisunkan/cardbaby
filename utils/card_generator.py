@@ -32,8 +32,15 @@ class CardGenerator:
     def add_header(self, card, org_name='', logo_path=None):
         draw = ImageDraw.Draw(card)
         header_rgb = self.hex_to_rgb(self.header_color)
+        
+        # Override header color based on theme if set in config/data
+        # This is a bit of a hack since we don't have a clean theme-to-color mapping in CardGenerator yet
+        # But for MVP it works
         draw.rectangle((0, 0, self.width, self.header_height), fill=header_rgb)
-        draw.rectangle((0, self.header_height - 2, self.width, self.header_height), fill=(218, 165, 32))
+        
+        # Accent line color
+        accent_color = (218, 165, 32) # Gold default
+        draw.rectangle((0, self.header_height - 2, self.width, self.header_height), fill=accent_color)
         
         text_x_offset = 15
         if logo_path and os.path.exists(logo_path):

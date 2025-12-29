@@ -98,7 +98,19 @@ def generate_card():
         if not template:
             return jsonify({'error': 'Template not found'}), 400
         
+        theme = request.form.get('theme', 'default')
+        theme_colors = {
+            'default': '#1a3a52',
+            'green': '#006633',
+            'red': '#cc0000',
+            'corporate': '#1a1a1a',
+            'purple': '#4b0082',
+            'orange': '#ff8c00',
+            'gold': '#8b6914'
+        }
+        
         config = template.get_config()
+        config['header_color'] = theme_colors.get(theme, config.get('header_color', '#1a3a52'))
         
         # Handle photo and logo uploads
         photo_filename = None
