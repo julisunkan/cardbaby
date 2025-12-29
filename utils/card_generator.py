@@ -18,7 +18,14 @@ class CardGenerator:
         hex_color = hex_color.lstrip('#')
         return (int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16))
     
-    def create_blank_card(self):
+    def create_blank_card(self, background_path=None):
+        if background_path and os.path.exists(background_path):
+            try:
+                bg = Image.open(background_path)
+                return bg.resize((self.width, self.height), Image.Resampling.LANCZOS).convert('RGB')
+            except Exception as e:
+                print(f"Error loading background image: {e}")
+        
         bg_rgb = self.hex_to_rgb(self.background_color)
         return Image.new('RGB', (self.width, self.height), bg_rgb)
     
@@ -171,8 +178,8 @@ class CardGenerator:
             print(f'Error adding QR: {e}')
         return card
 
-    def generate(self, data, photo_path=None, qr_path=None, watermark_func=None, logo_path=None):
-        card = self.create_blank_card()
+    def generate(self, data, photo_path=None, qr_path=None, watermark_func=None, logo_path=None, background_path=None):
+        card = self.create_blank_card(background_path)
         card = self.add_header(card, data.get('organization', ''), logo_path)
         card = self.add_photo_section(card, photo_path)
         card = self.add_info_section(card, data)

@@ -132,6 +132,9 @@ def generate_card():
         photo_path = os.path.join(app.config['UPLOAD_FOLDER'], photo_filename) if photo_filename else None
         logo_path = os.path.join(app.config['UPLOAD_FOLDER'], logo_filename) if logo_filename else None
         
+        background_filename = data.get('background_image')
+        background_path = os.path.join('static/backgrounds', background_filename) if background_filename else None
+        
         # Prepare watermark function
         watermark_obj = Watermark.query.first()
         if watermark_obj and watermark_obj.enabled:
@@ -141,7 +144,7 @@ def generate_card():
         else:
             watermark_func = None  # type: ignore
         
-        card_image = card_gen.generate(data, photo_path, qr_path, watermark_func, logo_path)
+        card_image = card_gen.generate(data, photo_path, qr_path, watermark_func, logo_path, background_path)
         
         # Save card image
         card_filename = f"card_{data.get('id_number')}.png"
@@ -165,6 +168,7 @@ def generate_card():
             theme=data.get('theme', 'default'),
             photo_filename=photo_filename,
             logo_filename=logo_filename,
+            background_filename=background_filename,
             font_family=data.get('font_family', 'DejaVuSans'),
             font_size=int(data.get('font_size', 20)),
             card_png=card_filename,
@@ -288,6 +292,8 @@ def init_db():
             db.session.execute(db.text('ALTER TABLE id_cards ADD COLUMN font_family VARCHAR(100)'))
         if 'font_size' not in columns:
             db.session.execute(db.text('ALTER TABLE id_cards ADD COLUMN font_size INTEGER'))
+        if 'background_filename' not in columns:
+            db.session.execute(db.text('ALTER TABLE id_cards ADD COLUMN background_filename VARCHAR(255)'))
         db.session.commit()
         
         # Create 11 colorful templates

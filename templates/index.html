@@ -102,14 +102,30 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Card Template</label>
-                        <select name="template_id" onchange="updatePreview()">
-                            {% for template in templates %}
-                            <option value="{{ template.id }}">{{ template.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                        <div class="form-group">
+                            <label>Card Template</label>
+                            <select name="template_id" onchange="updatePreview()">
+                                {% for template in templates %}
+                                <option value="{{ template.id }}">{{ template.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Background Image</label>
+                            <select name="background_image" onchange="updatePreview()">
+                                <option value="">None (White/Theme)</option>
+                                <option value="bg1.png">Corporate Blue Tech</option>
+                                <option value="bg2.png">Elegant Silver</option>
+                                <option value="bg3.png">Modern Emerald</option>
+                                <option value="bg4.png">Royal Gold & Charcoal</option>
+                                <option value="bg5.png">Geometric Connectivity</option>
+                                <option value="bg6.png">Warm Sunset</option>
+                                <option value="bg7.png">White Marble</option>
+                                <option value="bg8.png">Deep Teal Prism</option>
+                                <option value="bg9.png">Security Guilloche</option>
+                                <option value="bg10.png">Vibrant Purple Tech</option>
+                            </select>
+                        </div>
 
                     <div class="form-row">
                         <div class="form-group">
@@ -210,6 +226,7 @@
             const theme = formFields.theme.value;
             const fontSize = formFields.font_size.value;
             const fontFamily = formFields.font_family.value;
+            const backgroundImage = formFields.background_image.value;
 
             if (!fullName || !idNumber || !org || !dob || !issue || !expiry) {
                 document.getElementById('previewContainer').innerHTML = '<div class="preview-placeholder">Fill form to see preview</div>';
@@ -221,8 +238,13 @@
             else if (theme === 'red') headerColor = '#cc0000';
             else if (theme === 'corporate') headerColor = '#1a1a1a';
 
+            let bgStyle = 'background-color: #fff;';
+            if (backgroundImage) {
+                bgStyle = `background-image: url('/static/backgrounds/${backgroundImage}'); background-size: cover;`;
+            }
+
             const previewHTML = `
-                <div class="card-preview" style="background-color: #fff; border: 1px solid #ddd; border-radius: 4px; font-family: ${fontFamily};">
+                <div class="card-preview" style="${bgStyle} border: 1px solid #ddd; border-radius: 4px; font-family: ${fontFamily};">
                     <div class="card-header" style="background-color: ${headerColor}; color: white; padding: 15px; font-weight: bold; border-radius: 4px 4px 0 0; font-size: ${parseInt(fontSize)+4}px;">
                         ${org}
                     </div>

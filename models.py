@@ -19,6 +19,7 @@ class IDCard(db.Model):
     logo_filename = db.Column(db.String(255))
     font_family = db.Column(db.String(100), default='DejaVuSans')
     font_size = db.Column(db.Integer, default=20)
+    background_filename = db.Column(db.String(255), nullable=True)
     theme = db.Column(db.String(50), default='default')
     photo_filename = db.Column(db.String(255))
     card_png = db.Column(db.String(255))
