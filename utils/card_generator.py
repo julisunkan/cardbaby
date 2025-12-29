@@ -75,18 +75,14 @@ class CardGenerator:
         
         if photo_path and os.path.exists(photo_path):
             try:
-                # Cache the rembg session at class or module level if possible for speed
-                # For now, we use a slightly more efficient import and execution
+                # Optimized background removal
                 from rembg import remove, new_session
-                
-                # Check if session is already created to avoid reloading model
                 if not hasattr(self, '_rembg_session'):
-                    self._rembg_session = new_session("u2net_is") # Lightweight model
+                    self._rembg_session = new_session("u2net_is") # Faster lightweight model
                 
                 with open(photo_path, 'rb') as i:
-                    input_image = i.read()
-                    output_image = remove(input_image, session=self._rembg_session)
-                    photo = Image.open(BytesIO(output_image))
+                    photo = remove(i.read(), session=self._rembg_session)
+                    photo = Image.open(BytesIO(photo))
                 
                 photo_size = 120
                 photo.thumbnail((photo_size, photo_size), Image.Resampling.LANCZOS)
