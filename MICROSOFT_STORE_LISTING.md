@@ -6,7 +6,7 @@
 ---
 
 ## SHORT DESCRIPTION (Subtitle - Max 100 Characters)
-Professional ID cards with templates, verification, and 250+ countries
+Create & verify professional ID cards with templates, security features & 250+ countries
 
 ---
 
@@ -33,11 +33,14 @@ Create professional identification cards in minutes with Universal ID Card Gener
 - Unique ID number generation
 - Digital signature support
 
-**Verify Cards Instantly**
-- Search by ID number to verify card status
-- Scan QR codes for quick authentication
-- Real-time authenticity confirmation
-- View cardholder information securely
+**Verify Cards Instantly & Securely**
+- Advanced verification system with ID number search and QR code scanning
+- Real-time authenticity confirmation with security indicators
+- View comprehensive cardholder information with visual status badges
+- Verify card validity, expiration, and revocation status instantly
+- Check embedded QR codes and Machine Readable Zone (MRZ) validation
+- Public verification page for contactless card authentication
+- API endpoint for integration with third-party systems
 
 **Export Flexibly**
 - PNG format for digital sharing and display
@@ -58,10 +61,12 @@ Create professional identification cards in minutes with Universal ID Card Gener
 ✓ **QR Code Integration** - Built-in QR codes for scanning verification
 ✓ **MRZ Support** - Machine Readable Zone with passport-standard format
 ✓ **Watermark System** - Customizable watermarks for security
-✓ **Real-time Verification** - Instant card authenticity checking
+✓ **Real-time Card Verification** - Instant verification system with public access
+✓ **Smart Verification Features** - ID lookup, QR scanning, security indicators, status tracking
 ✓ **PDF + PNG Export** - Multiple format support for flexibility
+✓ **Card Status Management** - Track valid, expired, and revoked cards automatically
 ✓ **No Design Skills Needed** - Professional results with just a few clicks
-✓ **Audit Logging** - Complete record of all card operations
+✓ **Audit Logging** - Complete record of all card operations and verification attempts
 
 ### Who Uses It?
 - **Corporate HR Departments** - Employee identification programs
@@ -129,12 +134,16 @@ Create professional identification cards in minutes with Universal ID Card Gener
 - Unique ID generation
 - Watermarks
 
-**Card Verification**
-- Real-time verification system
-- QR code scanning support
-- ID number lookup
-- Visual status indicators
-- API endpoint for integration
+**Card Verification & Authentication**
+- Real-time verification system accessible to anyone
+- QR code scanning support for instant authentication
+- ID number lookup with detailed card information
+- Visual status indicators (Valid, Expired, Revoked)
+- Public verification page shareable via QR code links
+- API endpoint for integration with third-party systems
+- Automatic expiry detection and status tracking
+- Complete verification audit trail
+- Contactless authentication through public interface
 
 **Export Options**
 - PNG format export
@@ -164,8 +173,8 @@ Create professional identification cards in minutes with Universal ID Card Gener
 **Screenshot 3: Customization Options**
 "Full control over every element - adjust colors, fonts, add logos, photos, backgrounds, and watermarks to match your organization's branding."
 
-**Screenshot 4: Verification System**
-"Verify card authenticity instantly by ID number or QR code scan. See real-time status and security indicators."
+**Screenshot 4: Card Verification System**
+"Verify card authenticity in seconds - enter ID number, scan QR code, or use public verification link. See comprehensive status indicators, cardholder details, and security validation results instantly."
 
 **Screenshot 5: Export Options**
 "Export cards as PNG for digital sharing or PDF for professional printing. Perfect for immediate distribution or archiving."
@@ -178,13 +187,16 @@ Create professional identification cards in minutes with Universal ID Card Gener
 - Full ID card generation with 6 professional templates
 - 250+ country nationality support
 - QR code and MRZ integration
-- Real-time card verification system
+- **Advanced card verification system** with public access
+- **ID-based card lookup** with comprehensive details
+- **QR code scanning verification** for instant authentication
+- **Real-time card status tracking** (Valid, Expired, Revoked)
 - PNG and PDF export
 - Advanced photo processing with automatic background removal
 - Watermark customization
 - Complete card lifecycle management
-- Audit logging
-- API verification endpoint
+- Audit logging for all operations and verification attempts
+- API verification endpoint for third-party integration
 
 ---
 
@@ -231,7 +243,7 @@ This application:
 ---
 
 ## KEYWORDS FOR STORE SEARCH
-ID card generator, professional ID cards, employee badges, student ID, event badges, card design, ID verification, QR code cards, digital ID, credential management, identification system, card maker, professional cards, secure ID, international ID
+ID card generator, professional ID cards, employee badges, student ID, event badges, card design, ID verification, ID verification system, card verification, QR code cards, digital ID, credential management, identification system, card maker, professional cards, secure ID, international ID, verify cards, card authentication
 
 ---
 
@@ -310,17 +322,20 @@ ID card generator, professional ID cards, employee badges, student ID, event bad
 
 **Universal ID Card Generator**
 
-*Professional ID Cards with Templates, Verification & 250+ Countries*
+*Create & Verify Professional ID Cards with Advanced Security & 250+ Countries*
 
-Create professional identification cards in minutes with advanced security features, 6 premium templates, and instant verification system. Perfect for corporations, schools, government, and events.
+Create beautiful professional identification cards in minutes with advanced security features, 6 premium templates, and a powerful real-time card verification system. Verify card authenticity instantly through ID lookup or QR code scanning. Perfect for corporations, schools, government, and events.
 
 ### Highlights
-✓ 6 Professional Templates
+✓ Generate Professional ID Cards in Minutes
+✓ 6 Premium Templates & Full Customization
 ✓ 250+ Country Support  
-✓ QR Code & MRZ Security
-✓ Real-time Verification
-✓ PNG & PDF Export
-✓ No Design Skills Required
+✓ QR Code & MRZ Security Integration
+✓ **Real-time Card Verification System**
+✓ **Public Card Verification Pages with Status Indicators**
+✓ Automatic Card Status Tracking (Valid/Expired/Revoked)
+✓ PNG & PDF Export with High-Resolution Output
+✓ No Design Skills Required - Professional Results Guaranteed
 
 ### Rating: 4.8 ★★★★★ (Based on 523 reviews)
 
