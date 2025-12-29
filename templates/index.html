@@ -70,7 +70,11 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Signature</label>
-                            <input type="text" name="signature" placeholder="Signature text">
+                            <div id="signature-pad" class="signature-pad" style="border: 1px solid #ddd; background: #f9f9f9; height: 100px; cursor: crosshair;">
+                                <canvas width="400" height="100"></canvas>
+                            </div>
+                            <input type="hidden" name="signature" id="signatureInput">
+                            <button type="button" class="btn-sm btn-info" style="margin-top: 5px;" onclick="clearSignature()">Clear Signature</button>
                         </div>
                         <div class="form-group">
                             <label>Theme</label>
@@ -83,6 +87,21 @@
                         </div>
                     </div>
 
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Font Type</label>
+                            <select name="font_family" onchange="updatePreview()">
+                                <option value="DejaVuSans">Sans Serif</option>
+                                <option value="DejaVuSerif">Serif</option>
+                                <option value="DejaVuSansMono">Monospace</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Font Size</label>
+                            <input type="number" name="font_size" value="12" min="8" max="24" onchange="updatePreview()">
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label>Card Template</label>
                         <select name="template_id" onchange="updatePreview()">
@@ -92,10 +111,15 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label>Upload Photo (Optional)</label>
-                        <input type="file" name="photo" accept="image/*" onchange="handlePhotoUpload()">
-                        <small>PNG, JPG, GIF. Max 16MB.</small>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Upload Photo</label>
+                            <input type="file" name="photo" accept="image/*" onchange="handlePhotoUpload()">
+                        </div>
+                        <div class="form-group">
+                            <label>Organization Logo</label>
+                            <input type="file" name="logo" accept="image/*" onchange="handlePhotoUpload()">
+                        </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary">Generate Card</button>
@@ -121,10 +145,26 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <script>
         let currentCard = null;
+        let signaturePad;
 
-        function downloadFile(format) {
+        window.addEventListener('load', function() {
+            generateNewID();
+            
+            const canvas = document.querySelector("#signature-pad canvas");
+            signaturePad = new SignaturePad(canvas);
+            
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+            }
+        });
+
+        function clearSignature() {
+            signaturePad.clear();
+            document.getElementById('signatureInput').value = '';
+        }
             if (!currentCard) {
                 alert('No card generated yet');
                 return;
@@ -202,6 +242,10 @@
 
         document.getElementById('cardForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            if (!signaturePad.isEmpty()) {
+                document.getElementById('signatureInput').value = signaturePad.toDataURL();
+            }
             
             const formData = new FormData(e.target);
             

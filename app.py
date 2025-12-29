@@ -98,15 +98,25 @@ def generate_card():
         
         config = template.get_config()
         
-        # Handle photo upload
+        # Handle photo and logo uploads
         photo_filename = None
+        logo_filename = None
+        
         if 'photo' in request.files:
             file = request.files['photo']
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                filename = f"{datetime.now().timestamp()}_{filename}"
+                filename = f"{datetime.now().timestamp()}_photo_{filename}"
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 photo_filename = filename
+
+        if 'logo' in request.files:
+            file = request.files['logo']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                filename = f"{datetime.now().timestamp()}_logo_{filename}"
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                logo_filename = filename
         
         # Check if card already exists
         existing = IDCard.query.filter_by(id_number=data.get('id_number')).first()
@@ -120,6 +130,7 @@ def generate_card():
         # Generate card image
         card_gen = CardGenerator(config)
         photo_path = os.path.join(app.config['UPLOAD_FOLDER'], photo_filename) if photo_filename else None
+        logo_path = os.path.join(app.config['UPLOAD_FOLDER'], logo_filename) if logo_filename else None
         
         # Prepare watermark function
         watermark_obj = Watermark.query.first()
@@ -130,7 +141,7 @@ def generate_card():
         else:
             watermark_func = None  # type: ignore
         
-        card_image = card_gen.generate(data, photo_path, qr_path, watermark_func)
+        card_image = card_gen.generate(data, photo_path, qr_path, watermark_func, logo_path)
         
         # Save card image
         card_filename = f"card_{data.get('id_number')}.png"
@@ -153,6 +164,9 @@ def generate_card():
             signature=data.get('signature', ''),
             theme=data.get('theme', 'default'),
             photo_filename=photo_filename,
+            logo_filename=logo_filename,
+            font_family=data.get('font_family', 'DejaVuSans'),
+            font_size=int(data.get('font_size', 20)),
             card_png=card_filename,
             card_pdf=pdf_filename,
             qr_code=os.path.basename(qr_path),

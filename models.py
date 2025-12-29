@@ -15,7 +15,10 @@ class IDCard(db.Model):
     address = db.Column(db.String(500), nullable=False)
     issue_date = db.Column(db.Date, nullable=False)
     expiry_date = db.Column(db.Date, nullable=False)
-    signature = db.Column(db.String(200))
+    signature = db.Column(db.Text) # Base64 signature
+    logo_filename = db.Column(db.String(255))
+    font_family = db.Column(db.String(100), default='DejaVuSans')
+    font_size = db.Column(db.Integer, default=20)
     theme = db.Column(db.String(50), default='default')
     photo_filename = db.Column(db.String(255))
     card_png = db.Column(db.String(255))
