@@ -72,11 +72,29 @@ class CardGenerator:
                 photo = Image.open(photo_path)
                 photo_size = 120
                 photo.thumbnail((photo_size, photo_size), Image.Resampling.LANCZOS)
-                if photo.mode != 'RGB': photo = photo.convert('RGB')
+                
+                # Convert to RGBA to support transparency
+                if photo.mode != 'RGBA':
+                    photo = photo.convert('RGBA')
+                
+                # Make white pixels transparent (simple chroma keying)
+                # This treats pixels close to white as transparent
+                data = photo.getdata()
+                new_data = []
+                for item in data:
+                    # If pixel is very close to white, make it transparent
+                    if item[0] > 240 and item[1] > 240 and item[2] > 240:
+                        new_data.append((255, 255, 255, 0))
+                    else:
+                        new_data.append(item)
+                photo.putdata(new_data)
+                
                 photo_x = (photo_section_width - photo_size) // 2
                 photo_y = self.header_height + 20
                 draw.rectangle((photo_x - 2, photo_y - 2, photo_x + photo_size + 2, photo_y + photo_size + 2), outline=(255, 255, 255), width=2)
-                card.paste(photo, (photo_x, photo_y))
+                
+                # Paste with alpha mask to preserve transparency
+                card.paste(photo, (photo_x, photo_y), photo)
             except Exception as e:
                 print(f'Error adding photo: {e}')
         return card
