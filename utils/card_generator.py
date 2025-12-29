@@ -84,7 +84,7 @@ class CardGenerator:
     def add_info_section(self, card, data):
         draw = ImageDraw.Draw(card)
         font_family = data.get('font_family', 'DejaVuSans')
-        font_size = int(data.get('font_size', 12))
+        font_size = int(data.get('font_size', 10)) # Smaller font for pocket size
         
         font_dir = "/usr/share/fonts/truetype/dejavu/"
         font_path = os.path.join(font_dir, f"{font_family}.ttf")
@@ -94,7 +94,7 @@ class CardGenerator:
             bold_font_path = font_path
 
         try:
-            label_font = ImageFont.truetype(bold_font_path, max(8, font_size - 2))
+            label_font = ImageFont.truetype(bold_font_path, max(7, font_size - 2))
             value_font = ImageFont.truetype(font_path, font_size)
             label_small_font = ImageFont.truetype(font_path, max(6, font_size - 4))
         except:
