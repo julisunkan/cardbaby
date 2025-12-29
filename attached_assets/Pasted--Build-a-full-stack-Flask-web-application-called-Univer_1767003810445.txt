@@ -1,0 +1,299 @@
+
+Build a full-stack Flask web application called “Universal ID Card Generator (Live System)”.
+
+Core Requirements
+
+Use Python + Flask
+
+Use SQLite (via SQLAlchemy)
+
+Must run correctly on Replit
+
+Use only free & open-source libraries
+
+The app must be a real government ID generator
+
+1. Main Features
+A. ID Card Generation
+
+Generate generic ID Cards for Workers, Students, Staff etc
+
+User inputs:
+
+Full name
+
+Date of birth
+
+Unique ID number
+
+company/business/orginization
+
+Address
+
+Issue Date
+Expiry Date
+Signature
+
+Theme
+
+Photo upload
+
+Output formats:
+
+PNG image
+
+PDF download
+
+B. company/business/orginization Support
+
+Use ISO-3166 company/business/orginization list via pycompany/business/orginization
+
+Display company/business/orginization name on the card
+
+Render company/business/orginization flag (PNG) from static/flags/
+
+Flags must be required
+
+C. QR Code Verification
+
+Generate a QR code on every card
+
+QR links to /verify/<id_number>
+
+Verification page must show ONLY:
+
+Name
+
+company/business/orginization
+
+Status (VALID / REVOKED / EXPIRED)
+
+Expiry date
+
+Never show sensitive data
+
+2. Admin System
+A. Authentication
+
+Admin login/logout using Flask sessions
+
+Passwords must be hashed
+
+B. Admin Dashboard
+
+Admin can:
+
+View all generated ID cards
+
+Revoke / enable cards
+
+Download PNG or PDF
+
+See creation timestamps
+
+C. Admin-Customizable Watermark
+
+Watermark settings stored in SQLite:
+
+Text (string)
+
+Color (hex)
+
+Opacity (0–255)
+
+Position (top / center / bottom)
+
+Enabled / disabled toggle
+
+Watermark must be applied dynamically when generating cards
+
+Default watermark text: “STAFF”
+
+D. Admin-Editable Card Templates
+
+Card templates must be database-driven, not hard-coded
+
+Each template stored as JSON in SQLite
+
+Admin can edit:
+
+Card size
+
+Header height and color
+
+Background color
+
+Photo position & size
+
+Text start position & spacing
+
+QR position & size
+
+Templates must be selectable when generating an ID
+
+Changes should NOT require editing Python code
+
+3. Additional Features
+
+Multiple color themes
+
+Live card preview (AJAX)
+
+Bulk ID generation via CSV upload
+
+Export generated PDFs
+
+Rate limiting for generation routes
+
+Audit log for admin actions
+
+Optional expiry date for IDs
+
+Multi-language support (Flask-Babel ready)
+
+4. Tech Stack (Strict)
+
+Flask
+
+Flask-SQLAlchemy
+
+Pillow (PIL)
+
+pycompany/business/orginization
+
+qrcode
+
+reportlab
+
+Flask-Limiter
+
+SQLite
+
+HTML / CSS / JavaScript (no frontend frameworks)
+
+5. Project Structure
+/
+├── app.py
+├── models.py
+├── themes.py
+├── utils/
+│   ├── card_generator.py
+│   ├── qr_utils.py
+│   ├── pdf_export.py
+│   ├── csv_bulk.py
+│
+├── static/
+│   ├── flags/
+│   ├── uploads/
+│   ├── cards/
+│   ├── pdfs/
+│   └── css/
+│
+├── templates/
+│   ├── index.html
+│   ├── login.html
+│   ├── dashboard.html
+│   ├── result.html
+│   ├── verify.html
+│   └── watermark.html
+│
+├── database/
+│   └── idcards.db
+└── requirements.txt
+
+
+use real seals, formats, or ID patterns
+
+Biometric or sensitive data storage
+
+Verification page must show minimal information
+
+7. Output Expectations
+
+Provide fully working code
+
+Include comments explaining logic
+
+App must run immediately on Replit
+
+Include instructions to initialize the database
+
+The generated ID card must have these details: 
+1. Personal Information (Biographic Data)
+
+These details identify the holder:
+
+Full legal name
+
+Date of birth
+
+Place of birth or nationality
+
+Gender (where applicable)
+
+Unique ID or passport number
+
+Date of issue and expiry date
+
+2. Photograph and Physical Description
+
+A clear, recent photograph of the holder
+
+Sometimes includes height, eye color, or signature
+
+3. Machine-Readable Features
+
+Machine-Readable Zone (MRZ) (the lines of letters and numbers at the bottom of passports and some ID cards)
+
+Allows scanners to quickly verify the document
+
+4. Security Features (Anti-Forgery)
+
+These help prevent tampering or counterfeiting:
+
+Holograms or holographic overlays
+
+Watermarks visible when held up to light
+
+Microprinting (tiny text not easily copied)
+
+UV features visible only under ultraviolet light
+
+Guilloché patterns (fine, intricate background designs)
+
+5. Material and Physical Design
+
+Made from durable materials (polycarbonate cards or secure paper)
+
+Passport pages are stitched or bound securely
+
+Data may be laser-engraved rather than printed
+
+6. Biometric Features (Modern IDs)
+
+Many modern IDs and passports include:
+
+Embedded chip (e-passport / e-ID)
+
+Stores biometric data such as facial image or fingerprints
+
+7. Issuing Authority Information
+
+Name and emblem of the official authority
+
+company/business/orginization name and company/business/orginization code
+
+Official seals or symbols
+
+8. Legal Validity
+
+A valid ID or passport must:
+
+Be issued by an authorized government body
+
+Be within its validity period (not expired)
+
+Be unaltered and undamaged.
+
+Build the app step-by-step and ensure all features integrate cleanly.
+Prioritize clarity, modularity, and correctness.
