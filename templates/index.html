@@ -25,7 +25,13 @@
     <div class="container">
         <div class="form-container">
             <div class="form-section">
-                <h2>Generate Your ID Card</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>Generate Your ID Card</h2>
+                    <div>
+                        <button type="button" class="btn btn-small" onclick="saveFormData()">Save Details</button>
+                        <button type="button" class="btn btn-small btn-info" onclick="loadFormData()">Load Saved</button>
+                    </div>
+                </div>
                 <form id="cardForm" enctype="multipart/form-data">
                     <div class="form-group">
                         <label>Full Name*</label>
@@ -177,8 +183,67 @@
         let currentCard = null;
         let signaturePad;
 
+        const FORM_STORAGE_KEY = 'id_generator_form_data';
+
+        function saveFormData() {
+            const form = document.getElementById('cardForm');
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => {
+                if (key !== 'photo' && key !== 'logo' && key !== 'signature') {
+                    data[key] = value;
+                }
+            });
+            localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(data));
+            showNotification('Details saved successfully!');
+        }
+
+        function loadFormData() {
+            const savedData = localStorage.getItem(FORM_STORAGE_KEY);
+            if (!savedData) {
+                showNotification('No saved details found.', 'error');
+                return;
+            }
+            const data = JSON.parse(savedData);
+            const form = document.getElementById('cardForm');
+            Object.keys(data).forEach(key => {
+                const field = form.elements[key];
+                if (field) {
+                    if (field.type === 'checkbox') {
+                        field.checked = data[key] === 'on';
+                    } else {
+                        field.value = data[key];
+                    }
+                }
+            });
+            updatePreview();
+            showNotification('Details loaded successfully!');
+        }
+
+        function showNotification(message, type = 'success') {
+            const existing = document.getElementById('notification');
+            if (existing) existing.remove();
+            
+            const div = document.createElement('div');
+            div.id = 'notification';
+            div.style.position = 'fixed';
+            div.style.top = '20px';
+            div.style.right = '20px';
+            div.style.padding = '15px 25px';
+            div.style.borderRadius = '5px';
+            div.style.color = 'white';
+            div.style.backgroundColor = type === 'success' ? '#28a745' : '#dc3545';
+            div.style.zIndex = '1000';
+            div.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+            div.innerText = message;
+            document.body.appendChild(div);
+            
+            setTimeout(() => div.remove(), 3000);
+        }
+
         window.addEventListener('load', function() {
             generateNewID();
+            loadFormData();
             
             const canvas = document.querySelector("#signature-pad canvas");
             signaturePad = new SignaturePad(canvas);
