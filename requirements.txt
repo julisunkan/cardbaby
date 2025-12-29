@@ -19,3 +19,10 @@ python-dateutil
 qrcode
 reportlab
 werkzeug
+flask
+flask-sqlalchemy
+pillow
+python-dateutil
+qrcode
+reportlab
+werkzeug
