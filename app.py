@@ -261,6 +261,16 @@ def update_watermark():
     
     return jsonify({'success': True})
 
+@app.route('/api/template/<int:template_id>')
+def get_template(template_id):
+    template = CardTemplate.query.get_or_404(template_id)
+    return jsonify({
+        'id': template.id,
+        'name': template.name,
+        'config': template.get_config(),
+        'is_active': template.is_active
+    })
+
 @app.route('/api/template', methods=['POST'])
 def save_template():
     data = request.json
