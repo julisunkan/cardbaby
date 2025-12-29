@@ -324,19 +324,19 @@ def init_db():
             
             for tmpl in templates:
                 config = {
-                    'width': 1000,
-                    'height': 650,
+                    'width': 600,
+                    'height': 380,
                     'background_color': '#ffffff',
-                    'header_height': 80,
+                    'header_height': 60,
                     'header_color': tmpl['header_color'],
                     'photo_bg_color': tmpl['photo_bg'],
-                    'photo_x': 30,
-                    'photo_y': 100,
-                    'text_x': 300,
-                    'text_y': 100,
-                    'qr_x': 850,
-                    'qr_y': 550,
-                    'qr_size': 100
+                    'photo_x': 20,
+                    'photo_y': 70,
+                    'text_x': 180,
+                    'text_y': 70,
+                    'qr_x': 520,
+                    'qr_y': 310,
+                    'qr_size': 60
                 }
                 template = CardTemplate(name=tmpl['name'], is_active=True)
                 template.set_config(config)
