@@ -265,11 +265,9 @@ def init_db():
                     'qr_y': 550,
                     'qr_size': 100
                 }
-                    template = CardTemplate(name=tmpl['name'], is_active=True)
+                template = CardTemplate(name=tmpl['name'], is_active=True)
                 template.set_config(config)
                 db.session.add(template)
-            template.set_config(default_config)
-            db.session.add(template)
             
             # Create default watermark
             watermark = Watermark()
