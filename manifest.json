@@ -1,6 +1,6 @@
 {
   "name": "Universal ID Card Generator",
-  "short_name": "ID Card Gen",
+  "short_name": "Universal ID Card Generator",
   "description": "Professional ID card generation with passport-style design",
   "start_url": "/",
   "scope": "/",
