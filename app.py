@@ -4,6 +4,8 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import os
 import json
+import time
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from models import db, IDCard, CardTemplate, Watermark, AuditLog, AdminUser
 from utils.card_generator import CardGenerator
@@ -443,6 +445,41 @@ def not_found(error):
 def server_error(error):
     return jsonify({'error': 'Internal server error'}), 500
 
+def cleanup_old_images():
+    """Delete images older than 2 minutes from static folders"""
+    with app.app_context():
+        now = time.time()
+        max_age = 120  # 2 minutes in seconds
+        
+        folders = [
+            app.config['UPLOAD_FOLDER'],
+            'static/qrcodes',
+            'static/cards',
+            'static/pdfs'
+        ]
+        
+        for folder in folders:
+            if not os.path.exists(folder):
+                continue
+                
+            for filename in os.listdir(folder):
+                file_path = os.path.join(folder, filename)
+                # Skip .keep files or other important files if any
+                if os.path.isfile(file_path):
+                    file_age = now - os.path.getmtime(file_path)
+                    if file_age > max_age:
+                        try:
+                            os.remove(file_path)
+                            print(f"Deleted old file: {file_path}")
+                        except Exception as e:
+                            print(f"Error deleting {file_path}: {e}")
+
 if __name__ == '__main__':
     init_db()
+    
+    # Initialize and start scheduler
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(func=cleanup_old_images, trigger="interval", seconds=60)
+    scheduler.start()
+    
     app.run(host='0.0.0.0', port=5000, debug=False)
