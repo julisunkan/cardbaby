@@ -460,8 +460,14 @@ h3 {
 }
 
 .card-preview {
-    width: 100%;
+    width: 600px; /* Pocket size width */
+    height: 380px; /* Pocket size height */
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: scale(0.6); /* Scale for preview */
+    transform-origin: center;
+    background-color: white;
+    position: relative;
+    overflow: hidden;
 }
 
 .card-header {
