@@ -18,7 +18,10 @@ class IDCard(db.Model):
     signature = db.Column(db.Text) # Base64 signature
     logo_filename = db.Column(db.String(255))
     font_family = db.Column(db.String(100), default='DejaVuSans')
-    font_size = db.Column(db.Integer, default=20)
+    font_size = db.Column(db.Integer, default=10)
+    font_color = db.Column(db.String(7), default='#000000')
+    font_bold = db.Column(db.Boolean, default=False)
+    font_italic = db.Column(db.Boolean, default=False)
     background_filename = db.Column(db.String(255), nullable=True)
     theme = db.Column(db.String(50), default='default')
     photo_filename = db.Column(db.String(255))

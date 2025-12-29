@@ -102,6 +102,17 @@
                         </div>
                     </div>
 
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Text Color</label>
+                            <input type="color" name="font_color" value="#000000" onchange="updatePreview()">
+                        </div>
+                        <div class="form-group" style="display: flex; gap: 15px; align-items: flex-end; padding-bottom: 10px;">
+                            <label style="margin-bottom: 0;"><input type="checkbox" name="font_bold" onchange="updatePreview()"> Bold</label>
+                            <label style="margin-bottom: 0;"><input type="checkbox" name="font_italic" onchange="updatePreview()"> Italic</label>
+                        </div>
+                    </div>
+
                         <div class="form-group">
                             <label>Card Template</label>
                             <select name="template_id" onchange="updatePreview()">
@@ -226,6 +237,9 @@
             const theme = formFields.theme.value;
             const fontSize = formFields.font_size.value;
             const fontFamily = formFields.font_family.value;
+            const fontColor = formFields.font_color.value;
+            const fontBold = formFields.font_bold.checked;
+            const fontItalic = formFields.font_italic.checked;
             const backgroundImage = formFields.background_image.value;
 
             if (!fullName || !idNumber || !org || !dob || !issue || !expiry) {
@@ -243,8 +257,11 @@
                 bgStyle = `background-image: url('/static/backgrounds/${backgroundImage}'); background-size: cover;`;
             }
 
+            const fontWeight = fontBold ? 'bold' : 'normal';
+            const fontStyle = fontItalic ? 'italic' : 'normal';
+
             const previewHTML = `
-                <div class="card-preview" style="${bgStyle} border: 1px solid #ddd; border-radius: 4px; font-family: ${fontFamily};">
+                <div class="card-preview" style="${bgStyle} border: 1px solid #ddd; border-radius: 4px; font-family: ${fontFamily}; color: ${fontColor}; font-weight: ${fontWeight}; font-style: ${fontStyle};">
                     <div class="card-header" style="background-color: ${headerColor}; color: white; padding: 15px; font-weight: bold; border-radius: 4px 4px 0 0; font-size: ${parseInt(fontSize)+4}px;">
                         ${org}
                     </div>

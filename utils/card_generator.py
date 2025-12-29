@@ -85,16 +85,34 @@ class CardGenerator:
         draw = ImageDraw.Draw(card)
         font_family = data.get('font_family', 'DejaVuSans')
         font_size = int(data.get('font_size', 10))
+        font_color_hex = data.get('font_color', '#000000')
+        font_bold = data.get('font_bold') in ['on', True, 'true']
+        font_italic = data.get('font_italic') in ['on', True, 'true']
+        
+        value_color = self.hex_to_rgb(font_color_hex)
+        label_color = (26, 58, 82) # Keeping labels professional but could be customized too
         
         font_dir = "/usr/share/fonts/truetype/dejavu/"
-        font_path = os.path.join(font_dir, f"{font_family}.ttf")
-        bold_font_path = os.path.join(font_dir, f"{font_family}-Bold.ttf")
         
-        if not os.path.exists(bold_font_path):
-            bold_font_path = font_path
+        # Determine font path based on bold/italic
+        suffix = ""
+        if font_bold and font_italic: suffix = "-BoldOblique"
+        elif font_bold: suffix = "-Bold"
+        elif font_italic: suffix = "-Oblique"
+        
+        # Try to find the specific font variant, fallback to base font
+        font_filename = f"{font_family}{suffix}.ttf"
+        font_path = os.path.join(font_dir, font_filename)
+        
+        if not os.path.exists(font_path):
+            font_path = os.path.join(font_dir, f"{font_family}.ttf")
 
         try:
-            label_font = ImageFont.truetype(bold_font_path, max(7, font_size - 2))
+            # For labels, we prefer Bold if available, otherwise fallback to our main font_path
+            label_bold_path = os.path.join(font_dir, f"{font_family}-Bold.ttf")
+            label_font_path = label_bold_path if os.path.exists(label_bold_path) else font_path
+            
+            label_font = ImageFont.truetype(label_font_path, max(7, font_size - 2))
             value_font = ImageFont.truetype(font_path, font_size)
             label_small_font = ImageFont.truetype(font_path, max(6, font_size - 4))
         except:
@@ -105,7 +123,6 @@ class CardGenerator:
         available_height = info_end_y - info_start_y
         info_x, info_x_right = 180, 400
         item_spacing = available_height / 4
-        label_color, value_color = (26, 58, 82), (0, 0, 0)
         
         y1 = info_start_y
         draw.text((info_x, y1), "SURNAME / NOM", fill=label_color, font=label_small_font)
