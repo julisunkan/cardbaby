@@ -56,7 +56,7 @@ class AuditLog(db.Model):
     __tablename__ = 'audit_log'
     
     id = db.Column(db.Integer, primary_key=True)
-    admin_user = db.Column(db.String(100))
+    admin_user = db.Column(db.String(100), default='user')
     action = db.Column(db.String(200))
     card_id = db.Column(db.Integer, db.ForeignKey('id_cards.id'))
     details = db.Column(db.Text)

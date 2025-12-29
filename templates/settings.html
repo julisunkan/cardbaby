@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - ID Card Generator</title>
+    <title>Settings - ID Card Generator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
-            <h1>Admin Dashboard</h1>
+            <h1>Settings</h1>
             <div class="nav-links">
                 <a href="/">Home</a>
-                <a href="/admin/logout">Logout</a>
             </div>
         </div>
     </nav>
 
     <div class="container">
         <div class="admin-tabs">
-            <button class="tab-btn active" onclick="switchTab('cards')">Cards</button>
+            <button class="tab-btn active" onclick="switchTab('cards')">Recent Cards</button>
             <button class="tab-btn" onclick="switchTab('watermark')">Watermark</button>
             <button class="tab-btn" onclick="switchTab('templates')">Templates</button>
             <button class="tab-btn" onclick="switchTab('logs')">Audit Log</button>
@@ -40,7 +39,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for card in cards.items %}
+                    {% for card in cards %}
                     <tr>
                         <td>{{ card.id_number }}</td>
                         <td>{{ card.full_name }}</td>
@@ -56,25 +55,13 @@
                             {% else %}
                             <button class="btn-sm btn-success" onclick="enableCard({{ card.id }})">Enable</button>
                             {% endif %}
-                            <a href="/admin/card/{{ card.id }}/download/png" class="btn-sm btn-primary">PNG</a>
-                            <a href="/admin/card/{{ card.id }}/download/pdf" class="btn-sm btn-primary">PDF</a>
+                            <a href="/static/cards/{{ card.card_png }}" download class="btn-sm btn-primary">PNG</a>
+                            <a href="/static/pdfs/{{ card.card_pdf }}" download class="btn-sm btn-primary">PDF</a>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-
-            {% if cards.pages > 1 %}
-            <div class="pagination">
-                {% if cards.has_prev %}<a href="?page={{ cards.prev_num }}">Prev</a>{% endif %}
-                {% for page_num in cards.iter_pages() %}
-                    {% if page_num %}
-                        <a href="?page={{ page_num }}" class="{% if page_num == cards.page %}active{% endif %}">{{ page_num }}</a>
-                    {% endif %}
-                {% endfor %}
-                {% if cards.has_next %}<a href="?page={{ cards.next_num }}">Next</a>{% endif %}
-            </div>
-            {% endif %}
         </div>
 
         <!-- Watermark Tab -->
@@ -112,12 +99,14 @@
         <div id="templates" class="tab-content">
             <h2>Card Templates</h2>
             <button onclick="openAddTemplateModal()" class="btn btn-primary">Add Template</button>
-            <div id="templatesList" style="margin-top: 20px;">
+            <div id="templatesList" style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
                 {% for template in templates %}
-                <div class="template-card">
+                <div class="template-card" style="border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
                     <h3>{{ template.name }}</h3>
-                    <button class="btn-sm btn-primary" onclick="openEditTemplateModal({{ template.id }}, '{{ template.name }}')">Edit</button>
-                    {% if not template.is_active %}<span class="badge">Inactive</span>{% endif %}
+                    <div style="margin-top: 10px;">
+                        <button class="btn-sm btn-primary" onclick="openEditTemplateModal({{ template.id }}, '{{ template.name }}')">Edit</button>
+                        {% if not template.is_active %}<span class="badge">Inactive</span>{% endif %}
+                    </div>
                 </div>
                 {% endfor %}
             </div>
@@ -130,7 +119,7 @@
                 <thead>
                     <tr>
                         <th>Timestamp</th>
-                        <th>Admin</th>
+                        <th>User</th>
                         <th>Action</th>
                         <th>Details</th>
                     </tr>
@@ -178,17 +167,17 @@
 
                 <div class="form-group">
                     <label>Card Height (pixels)</label>
-                    <input type="number" id="cardHeight" name="height" value="600" min="300">
+                    <input type="number" id="cardHeight" name="height" value="650" min="300">
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label>Header Height</label>
-                        <input type="number" id="headerHeight" name="header_height" value="120" min="50">
+                        <input type="number" id="headerHeight" name="header_height" value="80" min="50">
                     </div>
                     <div class="form-group">
                         <label>Header Color</label>
-                        <input type="color" id="headerColor" name="header_color" value="#003366">
+                        <input type="color" id="headerColor" name="header_color" value="#1a3a52">
                     </div>
                 </div>
 
@@ -204,35 +193,35 @@
                     </div>
                     <div class="form-group">
                         <label>Photo Y Position</label>
-                        <input type="number" id="photoY" name="photo_y" value="160" min="0">
+                        <input type="number" id="photoY" name="photo_y" value="100" min="0">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label>Text X Position</label>
-                        <input type="number" id="textX" name="text_x" value="230" min="0">
+                        <input type="number" id="textX" name="text_x" value="300" min="0">
                     </div>
                     <div class="form-group">
                         <label>Text Y Position</label>
-                        <input type="number" id="textY" name="text_y" value="160" min="0">
+                        <input type="number" id="textY" name="text_y" value="100" min="0">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label>QR X Position</label>
-                        <input type="number" id="qrX" name="qr_x" value="800" min="0">
+                        <input type="number" id="qrX" name="qr_x" value="850" min="0">
                     </div>
                     <div class="form-group">
                         <label>QR Y Position</label>
-                        <input type="number" id="qrY" name="qr_y" value="400" min="0">
+                        <input type="number" id="qrY" name="qr_y" value="550" min="0">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>QR Size</label>
-                    <input type="number" id="qrSize" name="qr_size" value="120" min="50">
+                    <input type="number" id="qrSize" name="qr_size" value="100" min="50">
                 </div>
 
                 <div class="form-group">
@@ -255,24 +244,20 @@
             event.target.classList.add('active');
         }
 
-        function revokeCard(cardId) {
+        async function revokeCard(cardId) {
             if (!confirm('Revoke this card?')) return;
-            fetch(`/admin/card/${cardId}/revoke`, { method: 'POST' })
-                .then(r => r.json())
-                .then(d => {
-                    if (d.success) location.reload();
-                    else alert(d.error);
-                });
+            const res = await fetch(`/api/card/${cardId}/revoke`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) location.reload();
+            else alert(data.error);
         }
 
-        function enableCard(cardId) {
+        async function enableCard(cardId) {
             if (!confirm('Enable this card?')) return;
-            fetch(`/admin/card/${cardId}/enable`, { method: 'POST' })
-                .then(r => r.json())
-                .then(d => {
-                    if (d.success) location.reload();
-                    else alert(d.error);
-                });
+            const res = await fetch(`/api/card/${cardId}/enable`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) location.reload();
+            else alert(data.error);
         }
 
         document.getElementById('watermarkForm').addEventListener('submit', async (e) => {
@@ -284,7 +269,7 @@
                 position: document.getElementById('wmPosition').value,
                 enabled: document.getElementById('wmEnabled').checked
             };
-            const response = await fetch('/admin/watermark', {
+            const response = await fetch('/api/watermark', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -293,30 +278,25 @@
             if (result.success) alert('Watermark updated!');
         });
 
-        function viewCard(cardId) {
-            fetch(`/admin/card/${cardId}/view`)
-                .then(r => r.json())
-                .then(data => {
-                    const html = `
-                        <div class="card-detail-view">
-                            <table class="detail-table">
-                                <tr><td><strong>ID Number:</strong></td><td>${data.id_number}</td></tr>
-                                <tr><td><strong>Name:</strong></td><td>${data.full_name}</td></tr>
-                                <tr><td><strong>Organization:</strong></td><td>${data.organization}</td></tr>
-                                <tr><td><strong>DOB:</strong></td><td>${data.date_of_birth}</td></tr>
-                                <tr><td><strong>Address:</strong></td><td>${data.address}</td></tr>
-                                <tr><td><strong>Issue Date:</strong></td><td>${data.issue_date}</td></tr>
-                                <tr><td><strong>Expiry Date:</strong></td><td>${data.expiry_date}</td></tr>
-                                <tr><td><strong>Status:</strong></td><td><span class="badge badge-${data.status.toLowerCase()}">${data.status}</span></td></tr>
-                            </table>
-                            <div style="margin-top: 20px; text-align: center;">
-                                <img src="/static/cards/${data.card_png}?t=${Date.now()}" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;">
-                            </div>
-                        </div>
-                    `;
-                    document.getElementById('cardModalBody').innerHTML = html;
-                    document.getElementById('cardModal').style.display = 'block';
-                });
+        async function viewCard(cardId) {
+             const res = await fetch(`/admin/card/${cardId}/view`);
+             const data = await res.json();
+             const html = `
+                <div class="card-detail-view">
+                    <table class="table">
+                        <tr><td><strong>ID Number:</strong></td><td>${data.id_number}</td></tr>
+                        <tr><td><strong>Name:</strong></td><td>${data.full_name}</td></tr>
+                        <tr><td><strong>Organization:</strong></td><td>${data.organization}</td></tr>
+                        <tr><td><strong>DOB:</strong></td><td>${data.date_of_birth}</td></tr>
+                        <tr><td><strong>Status:</strong></td><td><span class="badge badge-${data.status.toLowerCase()}">${data.status}</span></td></tr>
+                    </table>
+                    <div style="margin-top: 20px; text-align: center;">
+                        <img src="/static/cards/${data.card_png}?t=${Date.now()}" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                </div>
+            `;
+            document.getElementById('cardModalBody').innerHTML = html;
+            document.getElementById('cardModal').style.display = 'block';
         }
 
         function closeCardModal() {
@@ -331,29 +311,27 @@
             document.getElementById('templateModal').style.display = 'block';
         }
 
-        function openEditTemplateModal(templateId, templateName) {
-            fetch(`/admin/template/${templateId}`)
-                .then(r => r.json())
-                .then(data => {
-                    document.getElementById('templateId').value = templateId;
-                    document.getElementById('templateName').value = data.name;
-                    document.getElementById('cardWidth').value = data.config.width || 1000;
-                    document.getElementById('cardHeight').value = data.config.height || 600;
-                    document.getElementById('headerHeight').value = data.config.header_height || 120;
-                    document.getElementById('headerColor').value = data.config.header_color || '#003366';
-                    document.getElementById('bgColor').value = data.config.background_color || '#ffffff';
-                    document.getElementById('photoX').value = data.config.photo_x || 30;
-                    document.getElementById('photoY').value = data.config.photo_y || 160;
-                    document.getElementById('textX').value = data.config.text_x || 230;
-                    document.getElementById('textY').value = data.config.text_y || 160;
-                    document.getElementById('qrX').value = data.config.qr_x || 800;
-                    document.getElementById('qrY').value = data.config.qr_y || 400;
-                    document.getElementById('qrSize').value = data.config.qr_size || 120;
-                    document.getElementById('templateActive').checked = data.is_active;
-                    
-                    document.getElementById('templateModalTitle').textContent = 'Edit Template';
-                    document.getElementById('templateModal').style.display = 'block';
-                });
+        async function openEditTemplateModal(templateId, templateName) {
+            const res = await fetch(`/api/template/${templateId}`);
+            const data = await res.json();
+            document.getElementById('templateId').value = templateId;
+            document.getElementById('templateName').value = data.name;
+            document.getElementById('cardWidth').value = data.config.width || 1000;
+            document.getElementById('cardHeight').value = data.config.height || 650;
+            document.getElementById('headerHeight').value = data.config.header_height || 80;
+            document.getElementById('headerColor').value = data.config.header_color || '#1a3a52';
+            document.getElementById('bgColor').value = data.config.background_color || '#ffffff';
+            document.getElementById('photoX').value = data.config.photo_x || 30;
+            document.getElementById('photoY').value = data.config.photo_y || 100;
+            document.getElementById('textX').value = data.config.text_x || 300;
+            document.getElementById('textY').value = data.config.text_y || 100;
+            document.getElementById('qrX').value = data.config.qr_x || 850;
+            document.getElementById('qrY').value = data.config.qr_y || 550;
+            document.getElementById('qrSize').value = data.config.qr_size || 100;
+            document.getElementById('templateActive').checked = data.is_active;
+            
+            document.getElementById('templateModalTitle').textContent = 'Edit Template';
+            document.getElementById('templateModal').style.display = 'block';
         }
 
         function closeTemplateModal() {
@@ -362,7 +340,6 @@
 
         document.getElementById('templateForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const config = {
                 width: parseInt(document.getElementById('cardWidth').value),
                 height: parseInt(document.getElementById('cardHeight').value),
@@ -377,36 +354,27 @@
                 qr_y: parseInt(document.getElementById('qrY').value),
                 qr_size: parseInt(document.getElementById('qrSize').value)
             };
-
             const data = {
                 id: document.getElementById('templateId').value || null,
                 name: document.getElementById('templateName').value,
                 config: config,
                 is_active: document.getElementById('templateActive').checked
             };
-
-            const response = await fetch('/admin/template', {
+            const response = await fetch('/api/template', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-            
             const result = await response.json();
             if (result.success) {
                 alert('Template saved!');
-                closeTemplateModal();
                 location.reload();
-            } else {
-                alert('Error: ' + (result.error || 'Failed to save template'));
             }
         });
 
-        // Close modal when clicking outside
         window.onclick = function(event) {
-            const cardModal = document.getElementById('cardModal');
-            const templateModal = document.getElementById('templateModal');
-            if (event.target === cardModal) cardModal.style.display = 'none';
-            if (event.target === templateModal) templateModal.style.display = 'none';
+            if (event.target === document.getElementById('cardModal')) closeCardModal();
+            if (event.target === document.getElementById('templateModal')) closeTemplateModal();
         }
     </script>
 </body>

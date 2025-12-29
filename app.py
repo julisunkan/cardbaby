@@ -33,8 +33,8 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def add_audit_log(action, card_id=None, details=''):
-    admin = session.get('admin_user', 'anonymous')
-    log = AuditLog(admin_user=admin, action=action, card_id=card_id, details=details)
+    user = 'anonymous'
+    log = AuditLog(admin_user=user, action=action, card_id=card_id, details=details)
     db.session.add(log)
     db.session.commit()
 
@@ -189,9 +189,39 @@ def verify_card(id_number):
 
 @app.route('/settings')
 def settings():
+    cards = IDCard.query.order_by(IDCard.created_at.desc()).all()
     templates = CardTemplate.query.all()
     watermark = Watermark.query.first()
-    return render_template('settings.html', templates=templates, watermark=watermark)
+    logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(50).all()
+    return render_template('settings.html', cards=cards, templates=templates, watermark=watermark, logs=logs)
+
+@app.route('/api/card/<int:card_id>/revoke', methods=['POST'])
+def revoke_card(card_id):
+    card = IDCard.query.get_or_404(card_id)
+    card.status = 'REVOKED'
+    db.session.commit()
+    add_audit_log('Card Revoked', card.id, f"ID: {card.id_number}")
+    return jsonify({'success': True})
+
+@app.route('/api/card/<int:card_id>/enable', methods=['POST'])
+def enable_card(card_id):
+    card = IDCard.query.get_or_404(card_id)
+    card.status = 'VALID'
+    db.session.commit()
+    add_audit_log('Card Enabled', card.id, f"ID: {card.id_number}")
+    return jsonify({'success': True})
+
+@app.route('/admin/card/<int:card_id>/view')
+def view_card_admin(card_id):
+    card = IDCard.query.get_or_404(card_id)
+    return jsonify({
+        'id_number': card.id_number,
+        'full_name': card.full_name,
+        'organization': card.organization,
+        'date_of_birth': card.date_of_birth.strftime('%Y-%m-%d'),
+        'status': card.status,
+        'card_png': card.card_png
+    })
 
 @app.route('/api/watermark', methods=['POST'])
 def update_watermark():
@@ -246,7 +276,17 @@ def init_db():
                 {'name': 'Rose Pink', 'header_color': '#880e4f', 'photo_bg': '#c2185b'},
                 {'name': 'Deep Teal', 'header_color': '#004d73', 'photo_bg': '#0288d1'},
                 {'name': 'Charcoal Pro', 'header_color': '#1a1a1a', 'photo_bg': '#424242'},
-                {'name': 'Corporate Navy', 'header_color': '#1a237e', 'photo_bg': '#3949ab'}
+                {'name': 'Corporate Navy', 'header_color': '#1a237e', 'photo_bg': '#3949ab'},
+                {'name': 'Cyber Neon', 'header_color': '#00ffcc', 'photo_bg': '#003333'},
+                {'name': 'Pastel Dreams', 'header_color': '#ffb3ba', 'photo_bg': '#ffdfba'},
+                {'name': 'Midnight Gold', 'header_color': '#2c3e50', 'photo_bg': '#f1c40f'},
+                {'name': 'Electric Violet', 'header_color': '#8e44ad', 'photo_bg': '#2980b9'},
+                {'name': 'Sahara Sand', 'header_color': '#e67e22', 'photo_bg': '#f39c12'},
+                {'name': 'Arctic Frost', 'header_color': '#3498db', 'photo_bg': '#ecf0f1'},
+                {'name': 'Emerald City', 'header_color': '#27ae60', 'photo_bg': '#2ecc71'},
+                {'name': 'Vibrant Lava', 'header_color': '#e74c3c', 'photo_bg': '#c0392b'},
+                {'name': 'Slate Modern', 'header_color': '#7f8c8d', 'photo_bg': '#95a5a6'},
+                {'name': 'Deep Galaxy', 'header_color': '#2c3e50', 'photo_bg': '#000000'}
             ]
             
             for tmpl in templates:
@@ -272,10 +312,6 @@ def init_db():
             # Create default watermark
             watermark = Watermark()
             db.session.add(watermark)
-            
-            # Create default admin user (username: admin, password: admin123)
-            admin = AdminUser(username='admin', password_hash=generate_password_hash('admin123'))
-            db.session.add(admin)
             
             db.session.commit()
 
