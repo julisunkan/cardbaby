@@ -51,9 +51,9 @@
                         <td>
                             <button class="btn-sm btn-info" onclick="viewCard({{ card.id }})">View</button>
                             {% if card.status == 'VALID' %}
-                            <button class="btn-sm btn-danger" onclick="revokeCard({{ card.id }})">Revoke</button>
+                            <button class="btn-sm btn-danger" onclick="revokeCard({{ card.id }}, this)">Revoke</button>
                             {% else %}
-                            <button class="btn-sm btn-success" onclick="enableCard({{ card.id }})">Enable</button>
+                            <button class="btn-sm btn-success" onclick="enableCard({{ card.id }}, this)">Enable</button>
                             {% endif %}
                             <a href="/static/cards/{{ card.card_png }}" download class="btn-sm btn-primary">PNG</a>
                             <a href="/static/pdfs/{{ card.card_pdf }}" download class="btn-sm btn-primary">PDF</a>
@@ -244,20 +244,52 @@
             event.target.classList.add('active');
         }
 
-        async function revokeCard(cardId) {
-            if (!confirm('Revoke this card?')) return;
+        async function revokeCard(cardId, btn) {
+            const container = btn.parentElement;
+            const originalHTML = container.innerHTML;
+            container.innerHTML = `
+                <div class="inline-confirm">
+                    <span>Are you sure?</span>
+                    <button class="btn-sm btn-danger" onclick="confirmRevoke(${cardId}, this)">Yes</button>
+                    <button class="btn-sm btn-secondary" onclick="cancelAction(this, \`${originalHTML.replace(/"/g, '&quot;')}\`)">No</button>
+                </div>
+            `;
+        }
+
+        async function confirmRevoke(cardId, btn) {
             const res = await fetch(`/api/card/${cardId}/revoke`, { method: 'POST' });
             const data = await res.json();
             if (data.success) location.reload();
             else alert(data.error);
         }
 
-        async function enableCard(cardId) {
-            if (!confirm('Enable this card?')) return;
+        async function enableCard(cardId, btn) {
+            const container = btn.parentElement;
+            const originalHTML = container.innerHTML;
+            container.innerHTML = `
+                <div class="inline-confirm">
+                    <span>Enable this card?</span>
+                    <button class="btn-sm btn-success" onclick="confirmEnable(${cardId}, this)">Yes</button>
+                    <button class="btn-sm btn-secondary" onclick="cancelAction(this, \`${originalHTML.replace(/"/g, '&quot;')}\`)">No</button>
+                </div>
+            `;
+        }
+
+        async function confirmEnable(cardId, btn) {
             const res = await fetch(`/api/card/${cardId}/enable`, { method: 'POST' });
             const data = await res.json();
             if (data.success) location.reload();
             else alert(data.error);
+        }
+
+        function cancelAction(btn, originalHTML) {
+            const container = btn.closest('td') || btn.closest('.template-card');
+            if (btn.closest('td')) {
+                container.innerHTML = originalHTML;
+            } else {
+                // For templates or other areas where we might use this
+                location.reload(); 
+            }
         }
 
         document.getElementById('watermarkForm').addEventListener('submit', async (e) => {
@@ -275,7 +307,16 @@
                 body: JSON.stringify(data)
             });
             const result = await response.json();
-            if (result.success) alert('Watermark updated!');
+            if (result.success) {
+                const btn = e.target.querySelector('button[type="submit"]');
+                const originalText = btn.textContent;
+                btn.textContent = 'Updated!';
+                btn.classList.replace('btn-primary', 'btn-success');
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.replace('btn-success', 'btn-primary');
+                }, 2000);
+            }
         });
 
         async function viewCard(cardId) {
@@ -367,8 +408,12 @@
             });
             const result = await response.json();
             if (result.success) {
-                alert('Template saved!');
-                location.reload();
+                const btn = e.target.querySelector('button[type="submit"]');
+                btn.textContent = 'Saved!';
+                btn.classList.replace('btn-primary', 'btn-success');
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
             }
         });
 
