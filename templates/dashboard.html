@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ID Card Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1>Admin Dashboard</h1>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/admin/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="switchTab('cards')">Cards</button>
+            <button class="tab-btn" onclick="switchTab('watermark')">Watermark</button>
+            <button class="tab-btn" onclick="switchTab('templates')">Templates</button>
+            <button class="tab-btn" onclick="switchTab('logs')">Audit Log</button>
+        </div>
+
+        <!-- Cards Tab -->
+        <div id="cards" class="tab-content active">
+            <h2>Generated ID Cards</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID Number</th>
+                        <th>Name</th>
+                        <th>Organization</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for card in cards.items %}
+                    <tr>
+                        <td>{{ card.id_number }}</td>
+                        <td>{{ card.full_name }}</td>
+                        <td>{{ card.organization }}</td>
+                        <td>
+                            <span class="badge badge-{{ card.status.lower() }}">{{ card.status }}</span>
+                        </td>
+                        <td>{{ card.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <button class="btn-sm btn-info" onclick="viewCard({{ card.id }})">View</button>
+                            {% if card.status == 'VALID' %}
+                            <button class="btn-sm btn-danger" onclick="revokeCard({{ card.id }})">Revoke</button>
+                            {% else %}
+                            <button class="btn-sm btn-success" onclick="enableCard({{ card.id }})">Enable</button>
+                            {% endif %}
+                            <a href="/admin/card/{{ card.id }}/download/png" class="btn-sm btn-primary">PNG</a>
+                            <a href="/admin/card/{{ card.id }}/download/pdf" class="btn-sm btn-primary">PDF</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if cards.pages > 1 %}
+            <div class="pagination">
+                {% if cards.has_prev %}<a href="?page={{ cards.prev_num }}">Prev</a>{% endif %}
+                {% for page_num in cards.iter_pages() %}
+                    {% if page_num %}
+                        <a href="?page={{ page_num }}" class="{% if page_num == cards.page %}active{% endif %}">{{ page_num }}</a>
+                    {% endif %}
+                {% endfor %}
+                {% if cards.has_next %}<a href="?page={{ cards.next_num }}">Next</a>{% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Watermark Tab -->
+        <div id="watermark" class="tab-content">
+            <h2>Watermark Settings</h2>
+            <form id="watermarkForm">
+                <div class="form-group">
+                    <label><input type="checkbox" id="wmEnabled" name="enabled" {% if watermark and watermark.enabled %}checked{% endif %}> Enable Watermark</label>
+                </div>
+                <div class="form-group">
+                    <label>Text</label>
+                    <input type="text" id="wmText" name="text" value="{{ watermark.text if watermark else 'STAFF' }}">
+                </div>
+                <div class="form-group">
+                    <label>Color</label>
+                    <input type="color" id="wmColor" name="color" value="{{ watermark.color if watermark else '#888888' }}">
+                </div>
+                <div class="form-group">
+                    <label>Opacity (0-255)</label>
+                    <input type="number" id="wmOpacity" name="opacity" min="0" max="255" value="{{ watermark.opacity if watermark else 128 }}">
+                </div>
+                <div class="form-group">
+                    <label>Position</label>
+                    <select id="wmPosition" name="position">
+                        <option value="top" {% if watermark and watermark.position == 'top' %}selected{% endif %}>Top</option>
+                        <option value="center" {% if watermark and watermark.position == 'center' %}selected{% endif %}>Center</option>
+                        <option value="bottom" {% if watermark and watermark.position == 'bottom' %}selected{% endif %}>Bottom</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Watermark</button>
+            </form>
+        </div>
+
+        <!-- Templates Tab -->
+        <div id="templates" class="tab-content">
+            <h2>Card Templates</h2>
+            <button onclick="addTemplate()" class="btn btn-primary">Add Template</button>
+            <div id="templatesList" style="margin-top: 20px;">
+                {% for template in templates %}
+                <div class="template-card">
+                    <h3>{{ template.name }}</h3>
+                    <button class="btn-sm btn-primary" onclick="editTemplate({{ template.id }})">Edit</button>
+                    {% if not template.is_active %}<span class="badge">Inactive</span>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Logs Tab -->
+        <div id="logs" class="tab-content">
+            <h2>Audit Log</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Admin</th>
+                        <th>Action</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>{{ log.admin_user }}</td>
+                        <td>{{ log.action }}</td>
+                        <td>{{ log.details }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function revokeCard(cardId) {
+            if (!confirm('Revoke this card?')) return;
+            fetch(`/admin/card/${cardId}/revoke`, { method: 'POST' })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success) location.reload();
+                    else alert(d.error);
+                });
+        }
+
+        function enableCard(cardId) {
+            if (!confirm('Enable this card?')) return;
+            fetch(`/admin/card/${cardId}/enable`, { method: 'POST' })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success) location.reload();
+                    else alert(d.error);
+                });
+        }
+
+        document.getElementById('watermarkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                text: document.getElementById('wmText').value,
+                color: document.getElementById('wmColor').value,
+                opacity: parseInt(document.getElementById('wmOpacity').value),
+                position: document.getElementById('wmPosition').value,
+                enabled: document.getElementById('wmEnabled').checked
+            };
+            const response = await fetch('/admin/watermark', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.success) alert('Watermark updated!');
+        });
+
+        function viewCard(cardId) {
+            alert('View card feature - integrate with modal');
+        }
+
+        function editTemplate(templateId) {
+            alert('Edit template feature - integrate with modal');
+        }
+
+        function addTemplate() {
+            alert('Add template feature - integrate with modal');
+        }
+    </script>
+</body>
+</html>

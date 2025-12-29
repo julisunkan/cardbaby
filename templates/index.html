@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal ID Card Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1>Universal ID Card Generator</h1>
+            <div class="nav-links">
+                <a href="/">Generate Card</a>
+                <a href="/admin/login">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-section">
+            <h2>Generate Your ID Card</h2>
+            <form id="cardForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Full Name*</label>
+                    <input type="text" name="full_name" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date of Birth*</label>
+                        <input type="date" name="date_of_birth" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Unique ID Number*</label>
+                        <input type="text" name="id_number" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Organization*</label>
+                    <input type="text" name="organization" required placeholder="Company/University/Organization">
+                </div>
+
+                <div class="form-group">
+                    <label>Address*</label>
+                    <textarea name="address" required rows="2"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Issue Date*</label>
+                        <input type="date" name="issue_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Expiry Date*</label>
+                        <input type="date" name="expiry_date" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Signature</label>
+                        <input type="text" name="signature" placeholder="Signature text">
+                    </div>
+                    <div class="form-group">
+                        <label>Theme</label>
+                        <select name="theme">
+                            <option value="default">Default (Blue)</option>
+                            <option value="green">Green</option>
+                            <option value="red">Red</option>
+                            <option value="corporate">Corporate</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Card Template</label>
+                    <select name="template_id">
+                        {% for template in templates %}
+                        <option value="{{ template.id }}">{{ template.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Upload Photo (Optional)</label>
+                    <input type="file" name="photo" accept="image/*">
+                    <small>PNG, JPG, GIF. Max 16MB.</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Generate Card</button>
+            </form>
+        </div>
+
+        <div id="result" class="result-section" style="display: none;">
+            <h2>Your ID Card</h2>
+            <div id="cardPreview"></div>
+            <div class="btn-group">
+                <a id="downloadPng" href="#" class="btn btn-success">Download as PNG</a>
+                <a id="downloadPdf" href="#" class="btn btn-success">Download as PDF</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('cardForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.querySelector('.form-section').style.display = 'none';
+                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('cardPreview').innerHTML = `<img src="/static/cards/${result.card_png}" alt="Generated Card">`;
+                    document.getElementById('downloadPng').href = `/static/cards/${result.card_png}`;
+                    document.getElementById('downloadPdf').href = `/static/pdfs/${result.card_pdf}`;
+                } else {
+                    alert('Error: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

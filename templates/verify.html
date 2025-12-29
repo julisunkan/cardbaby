@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID Card Verification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1>ID Card Verification</h1>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if status == 'NOT_FOUND' %}
+        <div class="alert alert-error">
+            <h2>Card Not Found</h2>
+            <p>The ID card you are looking for does not exist in our database.</p>
+        </div>
+        {% else %}
+        <div class="verification-result">
+            <h2>Card Information</h2>
+            <table class="info-table">
+                <tr>
+                    <td><strong>Name:</strong></td>
+                    <td>{{ card.full_name }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Organization:</strong></td>
+                    <td>{{ card.organization }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Status:</strong></td>
+                    <td><span class="badge badge-{{ card.status.lower() }}">{{ card.status }}</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Expiry Date:</strong></td>
+                    <td>{{ card.expiry_date.strftime('%Y-%m-%d') }}</td>
+                </tr>
+            </table>
+            <p style="margin-top: 20px; color: #666; font-size: 12px;">
+                <strong>Note:</strong> This verification page shows only public information. For security purposes, sensitive data such as date of birth, address, and photo are not displayed.
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
